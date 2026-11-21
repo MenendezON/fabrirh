@@ -1,3 +1,5 @@
+import { SlowNetworkBar } from "@/components/network-status";
+import { SessionExpiredDialog } from "@/components/session-expired-dialog";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/app-shell";
@@ -20,12 +22,15 @@ export const Route = createFileRoute("/_authenticated")({
     }
     return { user: data.user };
   },
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
   component: AuthenticatedLayout,
 });
 
 function AuthenticatedLayout() {
   return (
     <AuthProvider>
+      <SlowNetworkBar />
+      <SessionExpiredDialog />
       <AppShell>
         <Outlet />
       </AppShell>

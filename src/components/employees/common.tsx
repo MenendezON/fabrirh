@@ -160,13 +160,19 @@ export function SubmitButton({
 export function useEmployeeMutation<TVars>(
   employeeId: string,
   fn: (vars: TVars) => Promise<void>,
-  options: { success: string; errorMessages?: Record<string, string>; onDone?: () => void },
+  options: {
+    success: string;
+    /** Suite logique, affichée sous la confirmation. */
+    next?: string;
+    errorMessages?: Record<string, string>;
+    onDone?: () => void;
+  },
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      toast.success(options.success);
+      toast.success(options.success, options.next ? { description: options.next } : undefined);
       queryClient.invalidateQueries({ queryKey: employeeKey(employeeId) });
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       options.onDone?.();

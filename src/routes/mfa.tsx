@@ -11,20 +11,17 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { mfaCodeError } from "@/lib/mfa";
 import { safeRedirect } from "@/lib/safe-redirect";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/mfa")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
     typeof search["redirect"] === "string" ? { redirect: search["redirect"] } : {},
-  head: () => ({
-    meta: [
-      { title: "Vérification en deux étapes — Fabri RH" },
-      {
-        name: "description",
-        content: "Confirmez votre identité avec votre application d'authentification.",
-      },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: "Vérification en deux étapes",
+      description: "Confirmez votre identité avec votre application d'authentification.",
+      noindex: true,
+    }),
   component: MfaPage,
 });
 

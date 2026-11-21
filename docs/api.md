@@ -4,6 +4,8 @@ API REST **en lecture seule** pour les applications internes (paie, pointage…)
 
 Adresse de base : `https://<adresse-de-l-application>/api/v1`
 
+> Pour tester les requêtes, l'administrateur IT dispose d'une page Swagger : menu **Documentation API**.
+
 ## Authentification
 
 Une clé par application, au format `fms_xxxxxxxx_…`, transmise à chaque appel :

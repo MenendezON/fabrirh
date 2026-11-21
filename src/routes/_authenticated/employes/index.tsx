@@ -17,6 +17,7 @@ import {
 import { PageHeader } from "@/components/app-shell";
 import { FormRow, SelectInput } from "@/components/employees/common";
 import { ImportDialog } from "@/components/import-dialog";
+import { EmptyState, ErrorState, ListSkeleton, NoResults } from "@/components/states";
 import { NewEmployeeDialog } from "@/components/employees/new-employee-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -138,7 +139,7 @@ function EmployeesPage() {
     [units, search.unite],
   );
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: employeeListKey(search),
     enabled: ready && (!search.unite || unitsReady),
     placeholderData: keepPreviousData,
@@ -373,22 +374,34 @@ function EmployeesPage() {
             <TableBody>
               {isLoading || !ready ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
-                    <Loader2 className="mx-auto animate-spin" aria-label="Chargement" />
+                  <TableCell colSpan={8} className="px-4 py-6">
+                    <ListSkeleton label="Chargement de la liste" />
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-destructive">
-                    Impossible de charger la liste. Réessayez dans un instant.
+                  <TableCell colSpan={8} className="p-4">
+                    <ErrorState
+                      error={error}
+                      title="Impossible de charger la liste"
+                      onRetry={() => void refetch()}
+                    />
                   </TableCell>
                 </TableRow>
               ) : data && data.rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
-                    {filtersActive
-                      ? "Aucun employé ne correspond à ces critères."
-                      : "Aucun employé dans votre périmètre."}
+                  <TableCell colSpan={8}>
+                    {filtersActive ? (
+                      <NoResults
+                        query={search.q}
+                        onClear={() => navigate({ search: {}, replace: true })}
+                      />
+                    ) : (
+                      <EmptyState
+                        title="Aucun employé dans votre périmètre"
+                        hint="Les dossiers que vous avez le droit de voir apparaîtront ici. Si c'est inattendu, vérifiez votre périmètre avec l'administrateur IT."
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (

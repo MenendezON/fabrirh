@@ -11,22 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({
-    meta: [
-      { title: "Définir un mot de passe — Fabri RH" },
-      { name: "description", content: "Choisissez le mot de passe de votre compte Fabrimétal." },
-      { property: "og:title", content: "Définir un mot de passe — Fabri RH" },
-      {
-        property: "og:description",
-        content: "Choisissez le mot de passe de votre compte Fabrimétal.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: "Définir un mot de passe",
+      description: "Choisissez le mot de passe de votre compte Fabrimétal.",
+      noindex: true,
+    }),
   component: ResetPasswordPage,
 });
 
@@ -72,7 +65,9 @@ function ResetPasswordPage() {
 
   return (
     <AuthLayout>
-      <p className="eyebrow text-muted-foreground">{isInvite ? "Activation du compte" : "Sécurité"}</p>
+      <p className="eyebrow text-muted-foreground">
+        {isInvite ? "Activation du compte" : "Sécurité"}
+      </p>
       <h2 className="mt-2 text-2xl font-bold">
         {isInvite ? "Bienvenue, choisissez votre mot de passe" : "Nouveau mot de passe"}
       </h2>
@@ -98,12 +93,24 @@ function ResetPasswordPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
           <div className="space-y-2">
             <Label htmlFor="password">Mot de passe</Label>
-            <Input id="password" type="password" autoComplete="new-password" {...form.register("password")} />
-            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              {...form.register("password")}
+            />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirm">Confirmation</Label>
-            <Input id="confirm" type="password" autoComplete="new-password" {...form.register("confirm")} />
+            <Input
+              id="confirm"
+              type="password"
+              autoComplete="new-password"
+              {...form.register("confirm")}
+            />
             {errors.confirm && <p className="text-sm text-destructive">{errors.confirm.message}</p>}
           </div>
           <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>

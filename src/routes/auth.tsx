@@ -11,26 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { Honeypot } from "@/components/honeypot";
+import { useAntispam } from "@/lib/antispam";
 import { IDLE_NOTICE_KEY } from "@/lib/idle";
 import { safeRedirect } from "@/lib/safe-redirect";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
     typeof search["redirect"] === "string" ? { redirect: search["redirect"] } : {},
-  head: () => ({
-    meta: [
-      { title: "Connexion — Fabri RH" },
-      { name: "description", content: "Connectez-vous à l'outil de gestion du personnel Fabrimétal." },
-      { property: "og:title", content: "Connexion — Fabri RH" },
-      {
-        property: "og:description",
-        content: "Connectez-vous à l'outil de gestion du personnel Fabrimétal.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: "Connexion",
+      description: "Connectez-vous à l'outil de gestion du personnel Fabrimétal.",
+      noindex: true,
+    }),
   component: AuthPage,
 });
 
@@ -68,7 +63,10 @@ function AuthPage() {
   return (
     <AuthLayout>
       {mode === "signin" ? (
-        <SignInForm onForgot={() => setMode("forgot")} onSuccess={() => navigate({ to: target, replace: true })} />
+        <SignInForm
+          onForgot={() => setMode("forgot")}
+          onSuccess={() => navigate({ to: target, replace: true })}
+        />
       ) : (
         <ForgotForm onBack={() => setMode("signin")} />
       )}
@@ -82,10 +80,13 @@ function SignInForm({ onForgot, onSuccess }: { onForgot: () => void; onSuccess: 
     defaultValues: { email: "", password: "" },
   });
   const { errors, isSubmitting } = form.formState;
+  const spam = useAntispam();
 
   async function onSubmit(values: z.infer<typeof signInSchema>) {
+    if (!spam.verify()) return;
     const { error } = await supabase.auth.signInWithPassword(values);
     if (error) {
+      spam.recordFailure();
       toast.error(
         error.message.includes("Invalid login")
           ? "E-mail ou mot de passe incorrect."
@@ -95,6 +96,7 @@ function SignInForm({ onForgot, onSuccess }: { onForgot: () => void; onSuccess: 
       );
       return;
     }
+    spam.recordSuccess();
     onSuccess();
   }
 
@@ -105,7 +107,8 @@ function SignInForm({ onForgot, onSuccess }: { onForgot: () => void; onSuccess: 
       <p className="mt-2 text-sm text-muted-foreground">
         Les comptes sont créés par l'administrateur RH.
       </p>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="relative mt-8 space-y-5" noValidate>
+        <Honeypot inputRef={spam.honeypotRef} />
         <div className="space-y-2">
           <Label htmlFor="email">Adresse e-mail</Label>
           <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
@@ -134,6 +137,11 @@ function SignInForm({ onForgot, onSuccess }: { onForgot: () => void; onSuccess: 
           {isSubmitting && <Loader2 className="animate-spin" />}
           Se connecter
         </Button>
+        {spam.message && (
+          <p role="alert" className="text-sm text-destructive">
+            {spam.message}
+          </p>
+        )}
       </form>
     </div>
   );
@@ -146,12 +154,15 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
     defaultValues: { email: "" },
   });
   const { errors, isSubmitting } = form.formState;
+  const spam = useAntispam();
 
   async function onSubmit({ email }: z.infer<typeof resetSchema>) {
+    if (!spam.verify()) return;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) {
+      spam.recordFailure();
       toast.error("Envoi impossible. Réessayez dans quelques minutes.");
       return;
     }
@@ -174,7 +185,8 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
           Pensez à vérifier les courriers indésirables.
         </p>
       ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="relative mt-8 space-y-5" noValidate>
+          <Honeypot inputRef={spam.honeypotRef} />
           <div className="space-y-2">
             <Label htmlFor="reset-email">Adresse e-mail</Label>
             <Input id="reset-email" type="email" autoComplete="email" {...form.register("email")} />
@@ -184,6 +196,11 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
             {isSubmitting && <Loader2 className="animate-spin" />}
             Envoyer le lien
           </Button>
+          {spam.message && (
+            <p role="alert" className="text-sm text-destructive">
+              {spam.message}
+            </p>
+          )}
         </form>
       )}
     </div>

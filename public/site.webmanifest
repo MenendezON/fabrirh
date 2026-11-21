@@ -1,0 +1,14 @@
+{
+  "name": "Fabri RH",
+  "short_name": "Fabri RH",
+  "description": "Suivi du personnel de Fabrimétal Sénégal",
+  "lang": "fr",
+  "start_url": "/accueil",
+  "display": "standalone",
+  "background_color": "#333d46",
+  "theme_color": "#333d46",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

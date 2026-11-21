@@ -4,6 +4,7 @@ import { installGlobalErrorLogging } from "@/lib/log";
 import { Link } from "@tanstack/react-router";
 import {
   CalendarClock,
+  FileCode,
   FileSearch,
   ShieldCheck,
   BookOpen,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { BrandName } from "@/components/brand";
+import { PermissionDenied } from "@/components/states";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -47,6 +49,7 @@ type NavItem = {
     | "/journal"
     | "/aide"
     | "/api-cles"
+    | "/api-docs"
     | "/documentation";
   label: string;
   icon: LucideIcon;
@@ -99,6 +102,7 @@ const NAV: NavItem[] = [
     permission: ["audit", "view"],
   },
   { to: "/api-cles", label: "API et clés", icon: KeyRound, roles: ["admin_it"] },
+  { to: "/api-docs", label: "Documentation API", icon: FileCode, roles: ["admin_it"] },
   { to: "/documentation", label: "Documentation", icon: FileText, roles: ["admin_it"] },
   { to: "/aide", label: "Guide d'utilisation", icon: BookOpen },
 ];
@@ -274,12 +278,7 @@ export function RequirePermission({
     );
   }
   if (!can(resource, action)) {
-    return (
-      <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
-        <h1 className="text-xl font-bold">Accès réservé</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{message}</p>
-      </div>
-    );
+    return <PermissionDenied reason={message} />;
   }
   return <>{children}</>;
 }
@@ -295,12 +294,7 @@ export function RequireRole({
 }) {
   const { data: user } = useCurrentUser();
   if (!user?.role || !roles.includes(user.role)) {
-    return (
-      <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
-        <h1 className="text-xl font-bold">Accès réservé</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{message}</p>
-      </div>
-    );
+    return <PermissionDenied reason={message} />;
   }
   return <>{children}</>;
 }

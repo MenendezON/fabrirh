@@ -1,3 +1,4 @@
+import { clearDraft, useFormDraft } from "@/lib/drafts";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
@@ -84,6 +85,9 @@ export function ReviewsTab({ ctx }: { ctx: FicheContext }) {
   const { register, control, handleSubmit, reset, formState } = form;
   const errors = formState.errors;
 
+  const DRAFT_KEY = `review:${ctx.id}`;
+  useFormDraft(form, DRAFT_KEY, editing === "new");
+
   const save = useEmployeeMutation(
     ctx.id,
     async (v: ReviewForm) => {
@@ -94,7 +98,14 @@ export function ReviewsTab({ ctx }: { ctx: FicheContext }) {
           : await supabase.from("employee_reviews").insert({ ...payload, employee_id: ctx.id });
       if (error) throw error;
     },
-    { success: "Appréciation enregistrée.", onDone: () => setEditing(null) },
+    {
+      success: "Appréciation enregistrée.",
+      next: "Elle figure maintenant dans la liste ci-dessous.",
+      onDone: () => {
+        clearDraft(DRAFT_KEY);
+        setEditing(null);
+      },
+    },
   );
   const archive = useEmployeeMutation(
     ctx.id,
@@ -186,7 +197,15 @@ export function ReviewsTab({ ctx }: { ctx: FicheContext }) {
         </ul>
       )}
 
-      <Dialog open={editing !== null} onOpenChange={(o) => !o && setEditing(null)}>
+      <Dialog
+        open={editing !== null}
+        onOpenChange={(o) => {
+          if (!o) {
+            setEditing(null);
+            clearDraft(DRAFT_KEY);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>

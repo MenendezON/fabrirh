@@ -12,12 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as MfaRouteImport } from './routes/mfa'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAccesDocumentsRouteImport } from './routes/_authenticated/acces-documents'
 import { Route as AuthenticatedAccueilRouteImport } from './routes/_authenticated/accueil'
 import { Route as AuthenticatedAideRouteImport } from './routes/_authenticated/aide'
 import { Route as AuthenticatedApiClesRouteImport } from './routes/_authenticated/api-cles'
+import { Route as AuthenticatedApiDocsRouteImport } from './routes/_authenticated/api-docs'
 import { Route as AuthenticatedDocumentationRouteImport } from './routes/_authenticated/documentation'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedOrganigrammeRouteImport } from './routes/_authenticated/organigramme'
@@ -48,6 +53,16 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MfaRoute = MfaRouteImport.update({
   id: '/mfa',
   path: '/mfa',
@@ -56,6 +71,16 @@ const MfaRoute = MfaRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAccesDocumentsRoute =
@@ -77,6 +102,11 @@ const AuthenticatedAideRoute = AuthenticatedAideRouteImport.update({
 const AuthenticatedApiClesRoute = AuthenticatedApiClesRouteImport.update({
   id: '/api-cles',
   path: '/api-cles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedApiDocsRoute = AuthenticatedApiDocsRouteImport.update({
+  id: '/api-docs',
+  path: '/api-docs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDocumentationRoute =
@@ -168,12 +198,17 @@ const ApiV1EmployeesMatriculeRoute = ApiV1EmployeesMatriculeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/mfa': typeof MfaRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/acces-documents': typeof AuthenticatedAccesDocumentsRoute
   '/accueil': typeof AuthenticatedAccueilRoute
   '/aide': typeof AuthenticatedAideRoute
   '/api-cles': typeof AuthenticatedApiClesRoute
+  '/api-docs': typeof AuthenticatedApiDocsRoute
   '/documentation': typeof AuthenticatedDocumentationRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/organigramme': typeof AuthenticatedOrganigrammeRoute
@@ -193,12 +228,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/mfa': typeof MfaRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/acces-documents': typeof AuthenticatedAccesDocumentsRoute
   '/accueil': typeof AuthenticatedAccueilRoute
   '/aide': typeof AuthenticatedAideRoute
   '/api-cles': typeof AuthenticatedApiClesRoute
+  '/api-docs': typeof AuthenticatedApiDocsRoute
   '/documentation': typeof AuthenticatedDocumentationRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/organigramme': typeof AuthenticatedOrganigrammeRoute
@@ -220,12 +260,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/mfa': typeof MfaRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/acces-documents': typeof AuthenticatedAccesDocumentsRoute
   '/_authenticated/accueil': typeof AuthenticatedAccueilRoute
   '/_authenticated/aide': typeof AuthenticatedAideRoute
   '/_authenticated/api-cles': typeof AuthenticatedApiClesRoute
+  '/_authenticated/api-docs': typeof AuthenticatedApiDocsRoute
   '/_authenticated/documentation': typeof AuthenticatedDocumentationRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/organigramme': typeof AuthenticatedOrganigrammeRoute
@@ -247,12 +292,17 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/conditions'
+    | '/confidentialite'
     | '/mfa'
     | '/reset-password'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/acces-documents'
     | '/accueil'
     | '/aide'
     | '/api-cles'
+    | '/api-docs'
     | '/documentation'
     | '/journal'
     | '/organigramme'
@@ -272,12 +322,17 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/conditions'
+    | '/confidentialite'
     | '/mfa'
     | '/reset-password'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/acces-documents'
     | '/accueil'
     | '/aide'
     | '/api-cles'
+    | '/api-docs'
     | '/documentation'
     | '/journal'
     | '/organigramme'
@@ -298,12 +353,17 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/conditions'
+    | '/confidentialite'
     | '/mfa'
     | '/reset-password'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/_authenticated/acces-documents'
     | '/_authenticated/accueil'
     | '/_authenticated/aide'
     | '/_authenticated/api-cles'
+    | '/_authenticated/api-docs'
     | '/_authenticated/documentation'
     | '/_authenticated/journal'
     | '/_authenticated/organigramme'
@@ -325,8 +385,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConditionsRoute: typeof ConditionsRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   MfaRoute: typeof MfaRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiV1ContractsRoute: typeof ApiV1ContractsRoute
   ApiV1EmployeesMatriculeRoute: typeof ApiV1EmployeesMatriculeRoute
   ApiV1EmployeesIndexRoute: typeof ApiV1EmployeesIndexRoute
@@ -355,6 +419,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mfa': {
       id: '/mfa'
       path: '/mfa'
@@ -367,6 +445,20 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/acces-documents': {
@@ -395,6 +487,13 @@ declare module '@tanstack/react-router' {
       path: '/api-cles'
       fullPath: '/api-cles'
       preLoaderRoute: typeof AuthenticatedApiClesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/api-docs': {
+      id: '/_authenticated/api-docs'
+      path: '/api-docs'
+      fullPath: '/api-docs'
+      preLoaderRoute: typeof AuthenticatedApiDocsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/documentation': {
@@ -510,6 +609,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccueilRoute: typeof AuthenticatedAccueilRoute
   AuthenticatedAideRoute: typeof AuthenticatedAideRoute
   AuthenticatedApiClesRoute: typeof AuthenticatedApiClesRoute
+  AuthenticatedApiDocsRoute: typeof AuthenticatedApiDocsRoute
   AuthenticatedDocumentationRoute: typeof AuthenticatedDocumentationRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedOrganigrammeRoute: typeof AuthenticatedOrganigrammeRoute
@@ -529,6 +629,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccueilRoute: AuthenticatedAccueilRoute,
   AuthenticatedAideRoute: AuthenticatedAideRoute,
   AuthenticatedApiClesRoute: AuthenticatedApiClesRoute,
+  AuthenticatedApiDocsRoute: AuthenticatedApiDocsRoute,
   AuthenticatedDocumentationRoute: AuthenticatedDocumentationRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedOrganigrammeRoute: AuthenticatedOrganigrammeRoute,
@@ -551,8 +652,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConditionsRoute: ConditionsRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   MfaRoute: MfaRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiV1ContractsRoute: ApiV1ContractsRoute,
   ApiV1EmployeesMatriculeRoute: ApiV1EmployeesMatriculeRoute,
   ApiV1EmployeesIndexRoute: ApiV1EmployeesIndexRoute,

@@ -1,3 +1,5 @@
+import { clearAllDrafts } from "@/lib/drafts";
+import { markIntentionalSignOut, resetIntentionalSignOut } from "@/lib/session-expiry";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -31,6 +33,8 @@ export function useSignOut() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   return useCallback(async () => {
+    markIntentionalSignOut();
+    clearAllDrafts();
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
@@ -46,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading: userLoading } = useCurrentUser();
 
   useEffect(() => {
+    resetIntentionalSignOut();
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;

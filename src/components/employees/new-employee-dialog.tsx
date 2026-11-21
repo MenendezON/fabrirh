@@ -1,3 +1,4 @@
+import { clearDraft, useFormDraft } from "@/lib/drafts";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -28,6 +29,8 @@ import { countryOptions } from "@/lib/countries";
 import { managerOptionsQuery } from "@/lib/employees";
 import { dbErrorMessage, sitesQuery } from "@/lib/referentials";
 import { FormRow, SelectInput, SubmitButton } from "./common";
+
+const DRAFT_KEY = "new-employee";
 
 const EMPTY: EmployeeForm = {
   matricule: "",
@@ -66,6 +69,10 @@ export function NewEmployeeDialog({
   const { control, register, handleSubmit, reset, setError, formState } = form;
   const errors = formState.errors;
 
+  useFormDraft(form, DRAFT_KEY, open, () =>
+    toast.info("Brouillon restauré : votre saisie précédente a été retrouvée."),
+  );
+
   const create = useMutation({
     mutationFn: async (v: EmployeeForm) => {
       const { data, error } = await supabase
@@ -84,12 +91,15 @@ export function NewEmployeeDialog({
       return { id: data.id, siteLinked };
     },
     onSuccess: ({ id, siteLinked }) => {
-      toast.success("Dossier créé.");
+      toast.success("Dossier créé.", {
+        description: "Ajoutez maintenant le poste, le contrat et les documents depuis sa fiche.",
+      });
       if (!siteLinked)
         toast.warning("Le site n'a pas pu être rattaché : ajoutez-le depuis l'onglet Poste.");
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       onOpenChange(false);
       reset(EMPTY);
+      clearDraft(DRAFT_KEY);
       setSiteId("");
       navigate({ to: "/employes/$employeeId", params: { employeeId: id } });
     },
@@ -107,7 +117,10 @@ export function NewEmployeeDialog({
       open={open}
       onOpenChange={(o) => {
         onOpenChange(o);
-        if (!o) reset(EMPTY);
+        if (!o) {
+          reset(EMPTY);
+          clearDraft(DRAFT_KEY);
+        }
         setSiteId("");
       }}
     >

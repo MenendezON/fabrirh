@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { BrandName } from "@/components/brand";
+import { LegalFooter } from "@/components/legal-layout";
 
 const SITES = ["Sébikotane", "Sindia", "Dakar"];
 
@@ -30,14 +31,17 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           ))}
         </ul>
       </aside>
-      <main className="flex items-center justify-center px-5 py-12">
-        <div className="w-full max-w-sm">
-          <div className="mb-10 lg:hidden">
-            <BrandName />
+      <div className="flex min-h-screen flex-col">
+        <main id="contenu" className="flex flex-1 items-center justify-center px-5 py-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-10 lg:hidden">
+              <BrandName />
+            </div>
+            {children}
           </div>
-          {children}
-        </div>
-      </main>
+        </main>
+        <LegalFooter />
+      </div>
     </div>
   );
 }

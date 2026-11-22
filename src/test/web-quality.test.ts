@@ -27,8 +27,16 @@ const read = (f: string) => readFileSync(f, "utf8");
 
 describe("secrets : rien de secret dans le navigateur", () => {
   it("le fichier .env ne contient aucune clé de service ni secret", () => {
-    const env = read(".env");
-    expect(env).not.toMatch(/SERVICE_ROLE|SECRET|CRON|MIGRATION_URL/i);
+    for (const f of [".env", ".env.example"]) {
+      let env = "";
+      try {
+        env = read(f);
+      } catch {
+        continue; // .env n'est plus versionné
+      }
+      const filled = env.split("\n").filter((l) => /^(SUPABASE_SERVICE_ROLE_KEY|DATABASE_URL)=.+/.test(l));
+      expect(filled, f).toEqual([]);
+    }
   });
   it("seul du code serveur importe client.server ou lit la clé de service", () => {
     const allowed = (f: string) =>

@@ -1,5 +1,5 @@
 -- 01-colonnes.sql — colonnes manquantes + vue v_employee_current enrichie
--- Idempotent. À exécuter dans l'éditeur SQL Supabase (ou à faire exécuter par Lovable tel quel).
+-- Idempotent. À exécuter dans l'éditeur SQL Supabase.
 -- Testé sur PostgreSQL 16 local avec stubs Supabase (voir supabase/tests/README.md).
 BEGIN;
 

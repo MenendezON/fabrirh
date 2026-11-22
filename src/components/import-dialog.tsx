@@ -188,7 +188,7 @@ export function ImportDialog({
           )}
           <p className="text-xs text-muted-foreground">
             L'enregistrement en base (exécution transactionnelle) sera activé une fois la fonction
-            d'import fournie par Lovable.
+            d'import fournie avec l'application.
           </p>
         </section>
       </DialogContent>

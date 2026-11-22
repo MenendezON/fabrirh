@@ -4,7 +4,7 @@ Application interne de gestion du personnel de Fabrimétal Sénégal : fiches em
 contrats et sorties, documents, tableau de bord, administration (utilisateurs, permissions, journal).
 
 Pile : TanStack Start (React 19, TanStack Router/Query), Tailwind 4 + shadcn/ui, Supabase
-(Postgres + RLS + Storage + Auth/MFA), Vitest, Recharts. Le projet est synchronisé avec Lovable.
+(Postgres + RLS + Storage + Auth/MFA), Vitest, Recharts. Projet autonome : aucune dépendance à Lovable (voir `docs/hebergement.md`).
 
 ## Installation
 
@@ -14,14 +14,13 @@ Prérequis : [Bun](https://bun.sh) (ou Node 20+ et npm), un projet Supabase.
 git clone https://github.com/MenendezON/screenshot-exact.git
 cd screenshot-exact
 bun install
-# .env est géré par Lovable (valeurs publiques uniquement) ; .env.example liste toutes les variables
-# les secrets (clé service, secret du cron) se définissent dans Lovable → secrets, jamais dans Git
-bun run dev            # http://localhost:3000 (port indiqué par Vite au démarrage)
+cp .env.example .env.local   # puis remplir (voir docs/hebergement.md) ; .env.local n'est jamais versionné
+bun run dev                  # http://localhost:8080
 ```
 
 ## Variables d'environnement
 
-Le fichier `.env` versionné ne contient que des valeurs publiques (géré par Lovable). Les secrets (`SUPABASE_SERVICE_ROLE_KEY`, `LOVABLE_CRON_SECRET`, `LOVABLE_DB_MIGRATION_URL`) ne doivent jamais être committés.
+Aucun fichier `.env` n'est versionné : copiez `.env.example` vers `.env.local`. Les secrets (`SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`) ne doivent jamais être committés.
 
 | Variable | Où | Rôle |
 | --- | --- | --- |
@@ -31,16 +30,14 @@ Le fichier `.env` versionné ne contient que des valeurs publiques (géré par L
 | `SUPABASE_URL` | serveur | idem, côté fonctions serveur |
 | `SUPABASE_PUBLISHABLE_KEY` | serveur | clé publique, vérification des jetons |
 | `SUPABASE_SERVICE_ROLE_KEY` | serveur **uniquement** | opérations privilégiées (invitation, réinitialisation MFA, URL signées). Contourne la RLS : ne jamais l'exposer au navigateur |
-| `LOVABLE_CRON_SECRET` | serveur | secret des routes appelées par le planificateur (notifications quotidiennes) |
-| `LOVABLE_DB_MIGRATION_URL` | poste de développeur | chaîne de connexion Postgres pour `drizzle-kit` |
+| `DATABASE_URL` | poste de développeur | chaîne de connexion Postgres (scripts SQL, `drizzle-kit`) |
 
 ## Base de données : migrations, jeu de démonstration, tests
 
-Les migrations sont dans `drizzle/migrations/` (ordre numérique). **Elles sont appliquées par
-Lovable** : ne pas les modifier à la main. Tout changement de schéma passe par une demande à Lovable
-(voir `AGENTS.md`).
+Les migrations sont dans `drizzle/migrations/` (ordre numérique). Une base neuve se prépare
+en une commande : `DATABASE_URL=… sh supabase/apply-all.sh` (migrations, scripts `docs/sql-manuel/`, tâches planifiées).
 
-Hors Lovable (base locale ou nouvel environnement) :
+Étape par étape (base locale ou nouvel environnement) :
 
 ```sh
 # appliquer les migrations dans l'ordre
@@ -103,4 +100,5 @@ Faire un essai de restauration sur un projet de test avant d'en avoir besoin.
 - `docs/guide-utilisation.md` — guide d'utilisation pour les équipes RH.
 - `docs/api.md` — API de lecture pour les autres applications (clés, niveaux, ressources).
 - `docs/recette.md` — checklist de recette RH par module.
-- `AGENTS.md` — règles de collaboration avec Lovable.
+- `docs/hebergement.md` — Supabase, Vercel/Netlify, variables, bascule depuis Lovable.
+- `AGENTS.md` — règles de travail du projet.

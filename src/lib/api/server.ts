@@ -11,7 +11,7 @@ import {
   hasLevel,
 } from "./keys";
 
-// Les tables api_* ne sont pas dans les types générés tant que Lovable ne les a pas créées.
+// Les tables api_* ne sont pas dans les types générés tant que types.ts n'est pas régénéré.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function admin(): Promise<any> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

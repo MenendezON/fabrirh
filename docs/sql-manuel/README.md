@@ -1,6 +1,6 @@
 # Scripts SQL à appliquer à la main dans Supabase
 
-Ces scripts réalisent, **sans passer par Lovable**, les demandes de `demande-lovable-schema.md` qui ne touchent pas au cœur du système de permissions. Ils ont été **exécutés et testés** sur un PostgreSQL 16 local (simulation de Supabase : voir `supabase/tests/local/README.md`) : 101 vérifications SQL au total, scripts appliqués deux fois de suite (idempotents).
+Ces scripts réalisent, les évolutions de schéma qui complètent les migrations `drizzle/migrations`. Ils ont été **exécutés et testés** sur un PostgreSQL 16 local (simulation de Supabase : voir `supabase/tests/local/README.md`) : 101 vérifications SQL au total, scripts appliqués deux fois de suite (idempotents).
 
 | Script | Contenu | Demande |
 |---|---|---|
@@ -23,11 +23,10 @@ Ces scripts réalisent, **sans passer par Lovable**, les demandes de `demande-lo
    select cron.schedule('api-log-purge',          '30 3 * * *', $$ select public.purge_api_call_log(90) $$);
    ```
    (`pg_cron` est déjà activé par la migration `0006`.)
-5. **Types TypeScript** : les nouvelles colonnes et tables n'existent pas dans `src/integrations/supabase/types.ts`. Régénérez-les avant d'écrire du code qui les utilise : demander à Lovable de synchroniser le schéma, ou `supabase gen types typescript --project-id <id> > src/integrations/supabase/types.ts`. Sans cela, l'application continue de fonctionner mais ne voit pas les nouveautés.
+5. **Types TypeScript** : les nouvelles colonnes et tables n'existent pas dans `src/integrations/supabase/types.ts`. Régénérez-les avant d'écrire du code qui les utilise : `supabase gen types typescript --project-id <id> > src/integrations/supabase/types.ts`. Sans cela, l'application continue de fonctionner mais ne voit pas les nouveautés.
 
 ## Précautions
 
-- **Dérive avec Lovable** : Lovable tient son propre journal de migrations (`drizzle/migrations`). Ces scripts ne s'y inscrivent pas. Ils sont idempotents : si Lovable les rejoue plus tard (collés tels quels dans une demande de migration), rien ne casse. Pour garder un historique unique, vous pouvez aussi coller chaque script à Lovable en lui demandant de l'exécuter **sans le modifier**.
+- **Journal** : Le journal de migrations est `drizzle/migrations`. Ces scripts ne s'y inscrivent pas. Ils sont idempotents : si Lovable les rejoue plus tard (collés tels quels dans une demande de migration), rien ne casse. Pour garder un historique unique, vous pouvez aussi coller chaque script à Lovable en lui demandant de l'exécuter **sans le modifier**.
 - Le script 02 **remplace** la fonction `can_read_audit_table` (une ligne ajoutée pour `employee_reviews`) ; le script 05 **remplace** la contrainte de types de `notification_recipients` pour y ajouter `document_expiring`. Si Lovable modifie ces objets entre-temps, relisez la définition actuelle avant de rejouer.
 - Les contrôles de dépôt de fichiers (script 05) s'appuient sur `storage.objects.metadata` (`size`, `mimetype`), tels que Supabase les remplit : un essai réel avec un PDF est à faire (voir `docs/recette.md`).
-- Ce qui n'est **pas** ici et exige Lovable : voir la section « Ce qui nécessite obligatoirement Lovable » de `demande-lovable-schema.md`.

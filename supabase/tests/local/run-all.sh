@@ -1,6 +1,6 @@
 #!/bin/sh
 # Rejoue TOUT sur une base PostgreSQL locale jetable : simulation des schémas Supabase (stubs.sql),
-# migrations Drizzle/Lovable, jeu de démonstration, scripts docs/sql-manuel (appliqués DEUX fois pour vérifier
+# migrations Drizzle, jeu de démonstration, scripts docs/sql-manuel (appliqués DEUX fois pour vérifier
 # l'idempotence), puis tous les tests SQL. Attention : ce n'est PAS un vrai Supabase (voir README.md).
 # Usage : PGHOST=... PGPORT=... PGUSER=postgres sh supabase/tests/local/run-all.sh
 set -u

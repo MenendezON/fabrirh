@@ -9,7 +9,7 @@ import {
   validateExpiry,
 } from "@/lib/api/keys";
 
-/* Les tables api_* ne figurent pas encore dans les types générés (voir demande-lovable-schema, section 10). */
+/* Les tables api_* ne figurent pas encore dans les types générés. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type Ctx = {

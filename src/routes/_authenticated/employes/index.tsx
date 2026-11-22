@@ -100,7 +100,7 @@ function EmployeesPage() {
   const search = parseListSearch(Route.useSearch());
   const { can, ready } = usePermissions();
   const canExport = can("import_export", "export");
-  // La base n'accorde pas encore `import_export:import` (voir demande Lovable, section 9.a) :
+  // La base n'accorde pas encore `import_export:import` (voir docs/sql-manuel) :
   // en attendant, le bouton (contrôle local du fichier, sans écriture) est visible des rôles prévus.
   const { data: me } = useCurrentUser();
   const canImport =

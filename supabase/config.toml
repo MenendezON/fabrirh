@@ -1,1 +1,2 @@
-project_id = "rlweqefakdgcfmzpwykg"
+# Remplacez par la référence de VOTRE projet Supabase (Project Settings → General → Reference ID).
+project_id = "fabri-rh"

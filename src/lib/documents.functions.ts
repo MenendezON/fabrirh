@@ -16,7 +16,7 @@ const inputSchema = z.object({
  */
 export const getDocumentUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: z.input<typeof inputSchema>) => inputSchema.parse(input))
+  .validator((input: z.input<typeof inputSchema>) => inputSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { data: doc, error } = await context.supabase
       .from("documents")

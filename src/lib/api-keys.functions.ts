@@ -96,7 +96,7 @@ const createSchema = z.object({
 /** Crée une clé. La clé en clair n'est renvoyée qu'ici, une seule fois ; seule son empreinte est stockée. */
 export const createApiClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: z.input<typeof createSchema>) => createSchema.parse(input))
+  .validator((input: z.input<typeof createSchema>) => createSchema.parse(input))
   .handler(async ({ data, context }) => {
     await requireItAdmin(context as Ctx);
     const d0 = await admin();
@@ -137,7 +137,7 @@ export const createApiClient = createServerFn({ method: "POST" })
 
 export const revokeApiClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await requireItAdmin(context as Ctx);
     const d = await admin();
@@ -153,7 +153,7 @@ export const revokeApiClient = createServerFn({ method: "POST" })
 
 export const listApiCalls = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { clientId?: string | undefined } | undefined) =>
+  .validator((input: { clientId?: string | undefined } | undefined) =>
     z.object({ clientId: z.string().uuid().optional() }).parse(input ?? {}),
   )
   .handler(async ({ data, context }) => {

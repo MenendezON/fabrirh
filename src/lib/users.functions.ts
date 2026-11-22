@@ -65,7 +65,7 @@ async function logAdminEvent(
 /** Création d'un compte par invitation, avec ses rôles et ses périmètres. */
 export const inviteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: z.input<typeof inviteSchema>) => inviteSchema.parse(input))
+  .validator((input: z.input<typeof inviteSchema>) => inviteSchema.parse(input))
   .handler(async ({ data, context }) => {
     await requirePermission(context, "create");
 
@@ -110,7 +110,7 @@ const targetSchema = z.object({ userId: uuid });
 /** Désactive ou réactive un compte : rôles archivés ou restaurés, et connexion bloquée côté authentification. */
 export const setUserActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; active: boolean }) =>
+  .validator((input: { userId: string; active: boolean }) =>
     targetSchema.extend({ active: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -145,7 +145,7 @@ export const setUserActive = createServerFn({ method: "POST" })
 /** Envoie à l'utilisateur un e-mail de réinitialisation du mot de passe. */
 export const sendPasswordReset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; redirectTo: string }) =>
+  .validator((input: { userId: string; redirectTo: string }) =>
     targetSchema.extend({ redirectTo: z.string().url() }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -175,7 +175,7 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
 /** Supprime les facteurs TOTP de l'utilisateur : il devra en enregistrer un nouveau à sa prochaine connexion. */
 export const resetUserMfa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string }) => targetSchema.parse(input))
+  .validator((input: { userId: string }) => targetSchema.parse(input))
   .handler(async ({ data, context }) => {
     await requirePermission(context, "edit");
     if (data.userId === context.userId) {

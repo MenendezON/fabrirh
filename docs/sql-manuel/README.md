@@ -11,11 +11,13 @@ Ces scripts réalisent, les évolutions de schéma qui complètent les migration
 | `05-documents.sql` | bucket privé, politiques de stockage, contraintes, versions, journal d'accès, expiration (`generate_document_notifications()`) | 7a–7f |
 | `06-droit-import.sql` | action `import_export:import` pour `drh` et `gestionnaire_rh` | 9 (droit seulement) |
 | `07-genre.sql` | colonne `employees.gender` (`F` ou `M`, facultative) et sa présence dans `v_employee_current` | genre |
+| `08-role-employe.sql` | ajoute la valeur `employe` à l'énumération `app_role` — **à exécuter seul, avant le 09** (PostgreSQL interdit d'utiliser une valeur d'énumération dans la transaction qui la crée) | libre-service |
+| `09-libre-service.sql` | rôle `employe` (droits en lecture sur ses seules données), rôle attribué automatiquement dès qu'un compte est lié à une fiche (`profiles.employee_id`, unique), `my_employee_id()`, demandes de changement de coordonnées validées par la RH (`contact_change_requests`, `review_contact_change`, `cancel_contact_change`) | libre-service |
 
 ## Procédure (Supabase)
 
 1. **Sauvegarde** : Supabase → *Database → Backups* (ou `pg_dump`). Faites d'abord l'essai sur un projet de test si vous en avez un.
-2. Ouvrez *SQL Editor → New query*, collez le contenu du script **01**, cliquez *Run*. Attendez « Success ». Puis 02, 03, 04, 05, 06 **dans l'ordre**. Chaque script est dans une transaction : en cas d'erreur, rien n'est appliqué à moitié.
+2. Ouvrez *SQL Editor → New query*, collez le contenu du script **01**, cliquez *Run*. Attendez « Success ». Puis 02, 03, 04, 05, 06, 07 **dans l'ordre**, puis **08 seul**, puis 09 (dans une requête distincte). Chaque script est dans une transaction : en cas d'erreur, rien n'est appliqué à moitié.
 3. Vérifiez : *Table Editor* montre `employee_reviews`, `api_clients`, `api_call_log` ; *Storage* montre le bucket `employee-documents` en privé.
 4. **Tâche quotidienne** (une seule fois, après le script 05) : ajoutez les alertes de documents à la tâche planifiée existante, ou créez-en une :
    ```sql

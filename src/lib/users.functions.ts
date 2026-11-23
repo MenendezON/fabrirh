@@ -49,7 +49,12 @@ async function requirePermission(ctx: Ctx, action: "create" | "edit") {
 async function logAdminEvent(
   actorId: string,
   targetId: string,
-  event: "mfa_reset" | "password_reset" | "account_disabled" | "account_enabled",
+  event:
+    | "mfa_reset"
+    | "password_reset"
+    | "account_disabled"
+    | "account_enabled"
+    | "employees_invited",
 ) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin.from("audit_log").insert({
@@ -195,4 +200,130 @@ export const resetUserMfa = createServerFn({ method: "POST" })
     }
     await logAdminEvent(context.userId, data.userId, "mfa_reset");
     return { removed: list?.factors?.length ?? 0 };
+  });
+
+const inviteEmployeesSchema = z.object({
+  /** Vide = tous les employés en poste sans compte. */
+  employeeIds: z.array(uuid).max(1000).optional(),
+  /** Simulation : compte seulement, n'envoie aucun e-mail. */
+  dryRun: z.boolean().default(false),
+  redirectTo: z.string().url(),
+});
+
+export type InviteEmployeesResult = {
+  dryRun: boolean;
+  /** Fiches éligibles : en poste, sans compte, avec une adresse e-mail valide. */
+  eligible: number;
+  invited: number;
+  /** Compte déjà existant à cette adresse, simplement relié à la fiche. */
+  linked: number;
+  noEmail: number;
+  alreadyLinked: number;
+  failed: { name: string; reason: string }[];
+  /** Vrai si l'envoi s'est arrêté (limite d'e-mails) : relancer plus tard pour le reste. */
+  stoppedEarly: boolean;
+};
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Donne un accès à des employés : invitation par e-mail, puis lien compte ↔ fiche. Le rôle « employé »
+ * est attribué par la base (déclencheur) dès que le lien existe. Réservé à qui peut créer des comptes.
+ */
+export const inviteEmployees = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: z.input<typeof inviteEmployeesSchema>) => inviteEmployeesSchema.parse(input))
+  .handler(async ({ data, context }): Promise<InviteEmployeesResult> => {
+    await requirePermission(context, "create");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let query = supabaseAdmin
+      .from("v_employee_current")
+      .select("employee_id, first_names, last_name, professional_email, email")
+      .is("archived_at", null)
+      .eq("is_active", true);
+    if (data.employeeIds?.length) query = query.in("employee_id", data.employeeIds);
+    const { data: employees, error } = await query.limit(2000);
+    if (error) throw new Error("Impossible de lire la liste des employés.");
+
+    const { data: links } = await supabaseAdmin
+      .from("profiles")
+      .select("employee_id")
+      .not("employee_id", "is", null);
+    const linked = new Set((links ?? []).map((l) => l.employee_id as string));
+
+    const result: InviteEmployeesResult = {
+      dryRun: data.dryRun,
+      eligible: 0,
+      invited: 0,
+      linked: 0,
+      noEmail: 0,
+      alreadyLinked: 0,
+      failed: [],
+      stoppedEarly: false,
+    };
+    const todo: { id: string; name: string; email: string }[] = [];
+    for (const e of employees ?? []) {
+      if (!e.employee_id) continue;
+      if (linked.has(e.employee_id)) {
+        result.alreadyLinked += 1;
+        continue;
+      }
+      const email = (e.professional_email || e.email || "").trim().toLowerCase();
+      if (!EMAIL.test(email)) {
+        result.noEmail += 1;
+        continue;
+      }
+      todo.push({
+        id: e.employee_id,
+        name: `${e.first_names ?? ""} ${e.last_name ?? ""}`.trim(),
+        email,
+      });
+    }
+    result.eligible = todo.length;
+    if (data.dryRun) return result;
+
+    for (const t of todo) {
+      const { data: invited, error: inviteError } =
+        await supabaseAdmin.auth.admin.inviteUserByEmail(t.email, {
+          data: { full_name: t.name },
+          redirectTo: data.redirectTo,
+        });
+      let userId = invited?.user?.id;
+      if (inviteError || !userId) {
+        const msg = inviteError?.message ?? "";
+        if (/rate limit/i.test(msg)) {
+          result.stoppedEarly = true;
+          break;
+        }
+        if (/already been registered|already exists/i.test(msg)) {
+          const { data: existing } = await supabaseAdmin
+            .from("profiles")
+            .select("id, employee_id")
+            .ilike("email", t.email)
+            .maybeSingle();
+          if (existing && !existing.employee_id) {
+            userId = existing.id;
+            result.linked += 1;
+          } else {
+            result.failed.push({ name: t.name, reason: "Un compte existe déjà pour cette adresse." });
+            continue;
+          }
+        } else {
+          result.failed.push({ name: t.name, reason: "Invitation impossible." });
+          continue;
+        }
+      } else {
+        result.invited += 1;
+      }
+      const { error: linkError } = await supabaseAdmin
+        .from("profiles")
+        .update({ employee_id: t.id })
+        .eq("id", userId);
+      if (linkError) {
+        result.failed.push({ name: t.name, reason: "Invitation envoyée, mais lien à la fiche impossible." });
+      }
+    }
+    await logAdminEvent(context.userId, context.userId, "employees_invited");
+    return result;
   });

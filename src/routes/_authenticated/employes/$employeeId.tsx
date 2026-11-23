@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Archive, ArrowLeft, Lock, RotateCcw } from "lucide-react";
 
+import { AccessButton } from "@/components/employees/access-button";
 import { AssignmentTab } from "@/components/employees/assignment-tab";
 import { CompensationTab } from "@/components/employees/compensation-tab";
 import { Empty, Section } from "@/components/employees/common";
@@ -179,17 +180,20 @@ function FichePage() {
             </p>
           </div>
         </div>
-        {canArchive && (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={archive.isPending}
-            onClick={() => (archived ? archive.mutate(false) : setConfirmArchive(true))}
-          >
-            {archived ? <RotateCcw /> : <Archive />}{" "}
-            {archived ? "Restaurer le dossier" : "Archiver le dossier"}
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <AccessButton employeeId={employeeId} />
+          {canArchive && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={archive.isPending}
+              onClick={() => (archived ? archive.mutate(false) : setConfirmArchive(true))}
+            >
+              {archived ? <RotateCcw /> : <Archive />}{" "}
+              {archived ? "Restaurer le dossier" : "Archiver le dossier"}
+            </Button>
+          )}
+        </div>
       </header>
 
       <Tabs
@@ -205,9 +209,7 @@ function FichePage() {
           <TabsTrigger value="contrats">Contrats et sortie</TabsTrigger>
           <TabsTrigger value="remuneration">Rémunération</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
-          {can("reviews", "view") && (
-            <TabsTrigger value="appreciations">Appréciations</TabsTrigger>
-          )}
+          {can("reviews", "view") && <TabsTrigger value="appreciations">Appréciations</TabsTrigger>}
           <TabsTrigger value="historique">Historique</TabsTrigger>
         </TabsList>
         <TabsContent value="identite">
@@ -234,11 +236,7 @@ function FichePage() {
           )}
         </TabsContent>
         <TabsContent value="appreciations">
-          {can("reviews", "view") ? (
-            <ReviewsTab ctx={ctx} />
-          ) : (
-            <NoAccess title="Appréciations" />
-          )}
+          {can("reviews", "view") ? <ReviewsTab ctx={ctx} /> : <NoAccess title="Appréciations" />}
         </TabsContent>
         <TabsContent value="historique">
           {can("audit", "view") ? (

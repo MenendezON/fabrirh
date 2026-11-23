@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { KeyRound, Loader2, Pencil, ShieldOff, UserPlus } from "lucide-react";
+import { KeyRound, Loader2, Mail, Pencil, ShieldOff, UserPlus } from "lucide-react";
 
 import { PageHeader, RequirePermission } from "@/components/app-shell";
 import { FormRow } from "@/components/employees/common";
@@ -35,7 +35,13 @@ import { formatDate } from "@/lib/format";
 import { usePermission } from "@/lib/permissions";
 import { dbErrorMessage, orgUnitsQuery, sitesQuery } from "@/lib/referentials";
 import { ROLE_LABELS, ROLE_OPTIONS, useCurrentUser, type AppRole } from "@/lib/roles";
-import { inviteUser, resetUserMfa, sendPasswordReset, setUserActive } from "@/lib/users.functions";
+import {
+  inviteEmployees,
+  inviteUser,
+  resetUserMfa,
+  sendPasswordReset,
+  setUserActive,
+} from "@/lib/users.functions";
 
 export const Route = createFileRoute("/_authenticated/utilisateurs")({
   head: () => ({
@@ -56,6 +62,7 @@ function UsersContent() {
   const canCreate = usePermission("users", "create");
   const { data: users, isLoading, error } = useQuery(adminUsersQuery);
   const [creating, setCreating] = useState(false);
+  const [invitingEmployees, setInvitingEmployees] = useState(false);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -65,9 +72,14 @@ function UsersContent() {
         description="Seules les personnes invitées peuvent se connecter. Un compte désactivé conserve son historique."
         actions={
           canCreate ? (
-            <Button onClick={() => setCreating(true)}>
-              <UserPlus /> Créer un compte
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => setInvitingEmployees(true)}>
+                <Mail /> Inviter les employés
+              </Button>
+              <Button onClick={() => setCreating(true)}>
+                <UserPlus /> Créer un compte
+              </Button>
+            </div>
           ) : undefined
         }
       />
@@ -85,6 +97,7 @@ function UsersContent() {
         </ul>
       )}
       <UserDialog mode="create" open={creating} onClose={() => setCreating(false)} />
+      <InviteEmployeesDialog open={invitingEmployees} onClose={() => setInvitingEmployees(false)} />
     </div>
   );
 }
@@ -326,7 +339,8 @@ function UserDialog({
             fullName,
             email,
             roles: [...state.roles].filter(
-              (r): r is Exclude<AppRole, "admin_rh"> => r !== "admin_rh",
+              (r): r is Exclude<AppRole, "admin_rh" | "employe"> =>
+                r !== "admin_rh" && r !== "employe",
             ),
             siteIds: [...state.sites],
             unitIds: [...state.units],
@@ -491,6 +505,105 @@ function UserDialog({
             {save.isPending && <Loader2 className="animate-spin" />}
             {mode === "create" ? "Envoyer l'invitation" : "Enregistrer"}
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Invitation par lot : chaque employé en poste, avec une adresse e-mail, reçoit un accès « employé ». */
+function InviteEmployeesDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const invite = useServerFn(inviteEmployees);
+  const redirectTo = typeof window === "undefined" ? "" : `${window.location.origin}/reset-password`;
+  const preview = useQuery({
+    queryKey: ["invite-employees-preview"],
+    queryFn: () => invite({ data: { dryRun: true, redirectTo } }),
+    enabled: open,
+    staleTime: 0,
+  });
+  const send = useMutation({
+    mutationFn: () => invite({ data: { dryRun: false, redirectTo } }),
+    onSuccess: (r) => {
+      queryClient.invalidateQueries({ queryKey: adminUsersQuery.queryKey });
+      toast.success(`${r.invited + r.linked} accès donné(s).`, {
+        description: r.stoppedEarly
+          ? "Limite d'e-mails atteinte : relancez plus tard pour le reste."
+          : r.failed.length > 0
+            ? `${r.failed.length} fiche(s) à vérifier.`
+            : "Les employés reçoivent un e-mail pour choisir leur mot de passe.",
+      });
+    },
+    onError: (e) => toast.error(dbErrorMessage(e)),
+  });
+  const p = preview.data;
+  const r = send.data;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Inviter les employés</DialogTitle>
+          <DialogDescription>
+            Chaque employé en poste qui a une adresse e-mail (professionnelle de préférence) reçoit
+            une invitation. Il ne verra que ses propres informations.
+          </DialogDescription>
+        </DialogHeader>
+        {preview.isLoading && (
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> Calcul en cours…
+          </p>
+        )}
+        {preview.error && (
+          <p className="text-sm text-destructive">Impossible de préparer l'invitation.</p>
+        )}
+        {p && !r && (
+          <ul className="space-y-1 text-sm">
+            <li>
+              <strong>{p.eligible}</strong> employé(s) vont recevoir une invitation.
+            </li>
+            <li className="text-muted-foreground">{p.alreadyLinked} ont déjà un accès.</li>
+            <li className="text-muted-foreground">
+              {p.noEmail} n'ont pas d'adresse e-mail valide (à compléter sur leur fiche).
+            </li>
+          </ul>
+        )}
+        {r && (
+          <div className="space-y-2 text-sm" role="status">
+            <p>
+              <strong>{r.invited}</strong> invitation(s) envoyée(s)
+              {r.linked > 0 && `, ${r.linked} compte(s) existant(s) relié(s)`}.
+            </p>
+            {r.stoppedEarly && (
+              <p className="text-destructive">
+                Limite d'e-mails atteinte. Relancez plus tard : seuls les employés restants seront
+                invités.
+              </p>
+            )}
+            {r.failed.length > 0 && (
+              <ul className="list-disc pl-5 text-destructive">
+                {r.failed.slice(0, 10).map((f) => (
+                  <li key={f.name}>
+                    {f.name} : {f.reason}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {r ? "Fermer" : "Annuler"}
+          </Button>
+          {!r && (
+            <Button
+              disabled={!p || p.eligible === 0 || send.isPending}
+              onClick={() => send.mutate()}
+            >
+              {send.isPending && <Loader2 className="animate-spin" />} Envoyer {p?.eligible ?? 0}{" "}
+              invitation(s)
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

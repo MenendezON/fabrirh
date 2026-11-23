@@ -173,14 +173,14 @@ BEGIN
   -- ---------- manager (périmètre équipe récursif) ----------
   PERFORM pg_temp.act_as(u_mgr);
   SELECT count(*) INTO n FROM public.employees;
-  total := total + 1; ok := n = 9; IF NOT ok THEN failed := failed + 1; END IF;
-  out := out || format(E'\n[%s] manager voit son équipe directe et indirecte (%s / 9)', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END, n);
+  total := total + 1; ok := n = 10; IF NOT ok THEN failed := failed + 1; END IF;
+  out := out || format(E'\n[%s] manager voit son équipe (9) et sa propre fiche, rôle employé (%s / 10)', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END, n);
   SELECT count(*) INTO n FROM public.employees WHERE id = e_one;
   total := total + 1; ok := n = 0; IF NOT ok THEN failed := failed + 1; END IF;
   out := out || format(E'\n[%s] manager ne voit pas hors équipe', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END);
-  SELECT count(*) INTO n FROM public.compensation;
+  SELECT count(*) INTO n FROM public.compensation WHERE employee_id <> e_mgr;
   total := total + 1; ok := n = 0; IF NOT ok THEN failed := failed + 1; END IF;
-  out := out || format(E'\n[%s] manager ne voit pas les rémunérations (%s)', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END, n);
+  out := out || format(E'\n[%s] manager ne voit que sa propre rémunération, pas celle de l''équipe (%s autres)', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END, n);
   SELECT count(*) INTO n FROM public.contracts;
   total := total + 1; ok := n > 0; IF NOT ok THEN failed := failed + 1; END IF;
   out := out || format(E'\n[%s] manager voit les contrats de son équipe (%s)', CASE WHEN ok THEN 'OK' ELSE 'ÉCHEC' END, n);

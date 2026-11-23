@@ -11,6 +11,7 @@ import {
   FileText,
   KeyRound,
   ChartColumn,
+  ClipboardCheck,
   History,
   Hourglass,
   Home,
@@ -20,6 +21,7 @@ import {
   Network,
   SlidersHorizontal,
   TriangleAlert,
+  UserRound,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -36,6 +38,8 @@ import { ROLE_LABELS, useCurrentUser, type AppRole } from "@/lib/roles";
 type NavItem = {
   to:
     | "/accueil"
+    | "/mon-profil"
+    | "/demandes-coordonnees"
     | "/tableau-de-bord"
     | "/permissions"
     | "/acces-documents"
@@ -54,12 +58,15 @@ type NavItem = {
   label: string;
   icon: LucideIcon;
   roles?: AppRole[];
+  /** Visible seulement si le compte est rattaché à une fiche employé. */
+  selfService?: boolean;
   /** Visible seulement si la base accorde cette permission au rôle de l'utilisateur. */
   permission?: [Resource, Action];
 };
 
 const NAV: NavItem[] = [
   { to: "/accueil", label: "Accueil", icon: Home },
+  { to: "/mon-profil", label: "Mon profil", icon: UserRound, selfService: true },
   {
     to: "/tableau-de-bord",
     label: "Tableaux de bord",
@@ -67,6 +74,12 @@ const NAV: NavItem[] = [
     permission: ["dashboards", "view"],
   },
   { to: "/employes", label: "Employés", icon: Users, permission: ["employees", "view"] },
+  {
+    to: "/demandes-coordonnees",
+    label: "Demandes de coordonnées",
+    icon: ClipboardCheck,
+    permission: ["employees", "edit"],
+  },
   { to: "/organigramme", label: "Organigramme", icon: Network, permission: ["employees", "view"] },
   {
     to: "/contrats/echeances",
@@ -114,6 +127,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const items = NAV.filter(
     (item) =>
       (!item.roles || (user?.role && item.roles.includes(user.role))) &&
+      (!item.selfService || !!user?.employeeId) &&
       (!item.permission || can(...item.permission)),
   );
 

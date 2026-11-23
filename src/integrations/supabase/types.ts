@@ -349,6 +349,39 @@ export type Database = {
           },
         ]
       }
+      contact_change_requests: {
+        Row: {
+          archived_at: string | null
+          changes: Json
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          previous: Json
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          changes: Json
+          employee_id: string
+          id?: string
+          status?: string
+        }
+        Update: Record<string, never>
+        Relationships: [
+          {
+            foreignKeyName: "contact_change_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           archived_at: string | null
@@ -1878,6 +1911,18 @@ export type Database = {
       }
     }
     Functions: {
+      cancel_contact_change: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      my_employee_id: {
+        Args: never
+        Returns: string
+      }
+      review_contact_change: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: undefined
+      }
       can_read_audit_table: {
         Args: { _employee_id: string; _table: string }
         Returns: boolean
@@ -1972,6 +2017,7 @@ export type Database = {
         | "paie"
         | "manager"
         | "auditeur"
+        | "employe"
       contract_type: "cdi" | "cdd" | "stage" | "consultant"
       employee_status:
         | "cadre"
@@ -2116,6 +2162,7 @@ export const Constants = {
         "paie",
         "manager",
         "auditeur",
+        "employe",
       ],
       contract_type: ["cdi", "cdd", "stage", "consultant"],
       employee_status: [

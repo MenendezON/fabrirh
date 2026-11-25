@@ -13,6 +13,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   manager: "Manager",
   direction: "Direction",
   auditeur: "Auditeur",
+  employe: "Employé",
   admin_rh: "Administrateur RH (obsolète)",
 };
 
@@ -31,6 +32,8 @@ export type CurrentUser = {
   email: string;
   fullName: string;
   role: AppRole | null;
+  /** Fiche employé liée au compte (libre-service), s'il y en a une. */
+  employeeId: string | null;
 };
 
 export const currentUserQuery = queryOptions({
@@ -39,7 +42,7 @@ export const currentUserQuery = queryOptions({
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return null;
     const [{ data: profile }, { data: role }] = await Promise.all([
-      supabase.from("profiles").select("full_name, email").eq("id", auth.user.id).maybeSingle(),
+      supabase.from("profiles").select("full_name, email, employee_id").eq("id", auth.user.id).maybeSingle(),
       supabase.rpc("get_my_role"),
     ]);
     return {
@@ -47,6 +50,7 @@ export const currentUserQuery = queryOptions({
       email: profile?.email ?? auth.user.email ?? "",
       fullName: profile?.full_name ?? "",
       role: (role as AppRole | null) ?? null,
+      employeeId: profile?.employee_id ?? null,
     };
   },
   staleTime: 60_000,

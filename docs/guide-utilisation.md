@@ -81,3 +81,14 @@ Détails techniques pour les développeurs : `docs/api.md`.
 - Message d'erreur en rouge avec « Réessayer » : vérifiez votre connexion puis réessayez.
 - « Vous n'avez pas le droit… » : demandez l'accès à l'administrateur RH.
 - Signalement : indiquez la page, l'heure et le message affiché ; les erreurs techniques sont consignées automatiquement.
+
+## 12. Espace employé (libre-service)
+
+**Administrateur IT — donner l'accès aux employés.** *Utilisateurs → Inviter les employés* : l'écran simule d'abord (nombre d'employés invitables, sans e-mail valide, déjà reliés), puis envoie une invitation à chacun. Pour un seul employé : bouton *Donner l'accès* sur sa fiche. Le rôle **Employé** est attribué automatiquement dès que le compte est lié à la fiche.
+
+**Employé.** Après avoir choisi son mot de passe, l'employé arrive sur *Mon profil* : ses informations, son poste, ses contrats, sa rémunération et ses documents — et seulement les siens. Pour changer téléphone, adresse, situation familiale ou nombre d'enfants : onglet *Mes coordonnées* → *Envoyer pour validation*. Une seule demande à la fois ; il peut l'annuler tant qu'elle est en attente.
+
+**RH.** *Demandes de coordonnées* (menu, droit de modifier les employés) : comparer l'ancien et le nouveau, accepter (la fiche est mise à jour) ou refuser avec une note.
+
+Sur téléphone, le menu s'ouvre par le bouton en haut à gauche ; les écrans s'adaptent à la largeur.
+

@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, History, SlidersHorizontal, Users } from "lucide-react";
 
@@ -14,7 +14,10 @@ export const Route = createFileRoute("/_authenticated/accueil")({
       { title: "Accueil — Fabri RH" },
       { name: "description", content: "Tableau d'accueil de l'outil de gestion du personnel." },
       { property: "og:title", content: "Accueil — Fabri RH" },
-      { property: "og:description", content: "Tableau d'accueil de l'outil de gestion du personnel." },
+      {
+        property: "og:description",
+        content: "Tableau d'accueil de l'outil de gestion du personnel.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -28,6 +31,9 @@ function HomePage() {
   const isAdmin = usePermission("users", "view");
   const firstName = user?.fullName?.split(" ")[0];
 
+  // Un employé sans autre rôle arrive directement sur son espace personnel.
+  if (user?.role === "employe" && user.employeeId) return <Navigate to="/mon-profil" replace />;
+
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
@@ -39,7 +45,10 @@ function HomePage() {
       <section className="rounded-lg border bg-card">
         <div className="flex items-center justify-between border-b px-5 py-4">
           <h2 className="text-base font-semibold">Paramètres métier en vigueur</h2>
-          <Link to="/parametres" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+          <Link
+            to="/parametres"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
             Détails <ArrowRight className="size-4" />
           </Link>
         </div>
@@ -48,7 +57,8 @@ function HomePage() {
             <div key={s.id} className="px-5 py-4">
               <dt className="text-xs text-muted-foreground">{s.label}</dt>
               <dd className="mt-1 font-display text-2xl font-bold">
-                {s.value} <span className="text-sm font-medium text-muted-foreground">{s.unit}</span>
+                {s.value}{" "}
+                <span className="text-sm font-medium text-muted-foreground">{s.unit}</span>
               </dd>
             </div>
           ))}
@@ -57,9 +67,24 @@ function HomePage() {
 
       {isAdmin && (
         <section className="mt-6 grid gap-4 sm:grid-cols-3">
-          <QuickLink to="/utilisateurs" icon={Users} title="Utilisateurs" text="Inviter et attribuer les rôles" />
-          <QuickLink to="/parametres" icon={SlidersHorizontal} title="Paramètres" text="Ajuster les règles métier" />
-          <QuickLink to="/journal" icon={History} title="Journal d'audit" text="Tracer chaque modification" />
+          <QuickLink
+            to="/utilisateurs"
+            icon={Users}
+            title="Utilisateurs"
+            text="Inviter et attribuer les rôles"
+          />
+          <QuickLink
+            to="/parametres"
+            icon={SlidersHorizontal}
+            title="Paramètres"
+            text="Ajuster les règles métier"
+          />
+          <QuickLink
+            to="/journal"
+            icon={History}
+            title="Journal d'audit"
+            text="Tracer chaque modification"
+          />
         </section>
       )}
     </div>

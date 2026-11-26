@@ -15,6 +15,95 @@ DOTS = re.compile(r'^[\s .…]*$')
 HAS_DOTS = lambda n: n.strip(' \u00a0') != '' and DOTS.match(n) is not None
 PARA = re.compile(r'<w:p[ >].*?</w:p>', re.S)
 
+
+# ---------------------------------------------------------------------------------------------
+# Mise en forme imposée (A4, marges 1", Times New Roman, interligne 1,15)
+#   Document  : A4 (11906 × 16838 twips), marges 1" (1440) sur toutes les sections
+#   Titre     : Times New Roman 24 pt, gras, centré, interligne 1,15
+#   Paragraphes : Times New Roman 12 pt, justifiés, interligne 1,15
+# Les alignements « à droite » et « centré » du modèle (D'une part, signatures…) sont conservés.
+# ---------------------------------------------------------------------------------------------
+FONT = 'Times New Roman'
+LINE = 276                      # 1,15 × 240 (interligne « multiple »)
+BODY_PT, TITLE_PT = 12, 24      # points
+PAGE_W, PAGE_H, MARGIN = 11906, 16838, 1440
+
+PPR_AFTER_SPACING = ['ind', 'contextualSpacing', 'mirrorIndents', 'suppressOverlap', 'jc', 'textDirection',
+                     'textAlignment', 'textboxTightWrap', 'outlineLvl', 'divId', 'cnfStyle', 'rPr', 'sectPr', 'pPrChange']
+PPR_AFTER_JC = PPR_AFTER_SPACING[PPR_AFTER_SPACING.index('textDirection'):]
+RPR_AFTER_SZ = ['highlight', 'u', 'effect', 'bdr', 'shd', 'fitText', 'vertAlign', 'rtl', 'cs', 'em', 'lang',
+                'eastAsianLayout', 'specVanish', 'oMath']
+
+def insert_before(xml, tag_names, new):
+    """Insère `new` avant le premier élément enfant de `tag_names` (ordre imposé par le schéma OOXML)."""
+    m = re.search(r'<w:(%s)[ />]' % '|'.join(tag_names), xml)
+    return xml[:m.start()] + new + xml[m.start():] if m else xml + new
+
+def drop(xml, tag):
+    xml = re.sub(r'<w:%s(?: [^>]*)?/>' % tag, '', xml)
+    return re.sub(r'<w:%s(?: [^>]*)?>.*?</w:%s>' % (tag, tag), '', xml, flags=re.S)
+
+def fmt_rpr(rpr, pt, bold=False):
+    """Contenu d'un <w:rPr> : police, taille (et gras pour le titre) imposées, le reste conservé."""
+    for t in ('rFonts', 'sz', 'szCs'): rpr = drop(rpr, t)
+    if bold:
+        rpr = drop(rpr, 'b'); rpr = drop(rpr, 'bCs')
+    fonts = '<w:rFonts w:ascii="%s" w:eastAsia="%s" w:hAnsi="%s" w:cs="%s"/>' % ((FONT,) * 4)
+    # rStyle doit rester le premier enfant
+    m = re.match(r'(<w:rStyle [^>]*/>)', rpr)
+    head, rest = (m.group(1), rpr[m.end():]) if m else ('', rpr)
+    bold_xml = '<w:b/><w:bCs/>' if bold else ''
+    rest = insert_before(rest, ['i', 'iCs', 'caps', 'smallCaps', 'strike', 'dstrike', 'outline', 'shadow', 'emboss',
+                                'imprint', 'noProof', 'snapToGrid', 'vanish', 'webHidden', 'color', 'spacing', 'w',
+                                'kern', 'position', 'sz', 'szCs'] + RPR_AFTER_SZ, '') if False else rest
+    size = '<w:sz w:val="%d"/><w:szCs w:val="%d"/>' % (pt * 2, pt * 2)
+    rest = insert_before(rest, RPR_AFTER_SZ, size)
+    return head + fonts + bold_xml + rest
+
+def fmt_paragraph(p, title):
+    pt = TITLE_PT if title else BODY_PT
+    # propriétés de chaque run, et du saut de paragraphe
+    p = re.sub(r'<w:rPr>(.*?)</w:rPr>', lambda m: '<w:rPr>' + fmt_rpr(m.group(1), pt, title) + '</w:rPr>', p, flags=re.S)
+    def add_rpr(m):  # run sans <w:rPr> : en créer un
+        return m.group(1) + '<w:rPr>' + fmt_rpr('', pt, title) + '</w:rPr>' + m.group(2)
+    p = re.sub(r'(<w:r(?: [^>]*)?>)(?!<w:rPr>)((?:<w:(?:t|tab|br|sym)[ />]|<w:fldChar|<w:instrText))', add_rpr, p)
+    # propriétés du paragraphe : interligne 1,15 (espacements avant/après conservés), alignement
+    m = re.search(r'<w:pPr>(.*?)</w:pPr>', p, flags=re.S)
+    ppr = m.group(1) if m else ''
+    sp = re.search(r'<w:spacing ([^>]*)/>', ppr)
+    keep = ''
+    if sp:
+        for a in ('before', 'after', 'beforeLines', 'afterLines', 'beforeAutospacing', 'afterAutospacing'):
+            am = re.search(r'w:%s="[^"]*"' % a, sp.group(1))
+            if am: keep += ' ' + am.group(0)
+    jc = re.search(r'<w:jc w:val="(\w+)"/>', ppr)
+    align = 'center' if title else (jc.group(1) if jc and jc.group(1) in ('center', 'right') else 'both')
+    ppr = drop(drop(ppr, 'spacing'), 'jc')
+    ppr = insert_before(ppr, PPR_AFTER_SPACING, '<w:spacing%s w:line="%d" w:lineRule="auto"/>' % (keep, LINE))
+    ppr = insert_before(ppr, PPR_AFTER_JC, '<w:jc w:val="%s"/>' % align)
+    new = '<w:pPr>' + ppr + '</w:pPr>'
+    if m: return p[:m.start()] + new + p[m.end():]
+    return re.sub(r'(<w:p(?: [^>]*)?>)', lambda mm: mm.group(1) + new, p, count=1)
+
+def fmt_sections(x):
+    """A4 + marges 1" sur chaque section ; colonnes remises à l'échelle de la largeur utile."""
+    text_w = PAGE_W - 2 * MARGIN
+    x = re.sub(r'<w:pgSz [^>]*/>', '<w:pgSz w:w="%d" w:h="%d"/>' % (PAGE_W, PAGE_H), x)
+    x = re.sub(r'<w:pgMar [^>]*/>', lambda m: re.sub(r'w:(top|right|bottom|left)="\d+"', lambda a: 'w:%s="%d"' % (a.group(1), MARGIN), m.group(0)), x)
+    def cols(m):
+        widths = [int(v) for v in re.findall(r'<w:col w:w="(\d+)"', m.group(0))]
+        spaces = [int(v) for v in re.findall(r'w:space="(\d+)"/>', m.group(0))[:0]]
+        if len(widths) < 2: return '<w:cols w:space="708"/>'
+        gaps = [int(v) for v in re.findall(r'<w:col w:w="\d+" w:space="(\d+)"', m.group(0))]
+        total = sum(widths) + sum(gaps)
+        k = text_w / total
+        out = '<w:cols w:num="%d" w:space="0" w:equalWidth="0">' % len(widths)
+        for i, w in enumerate(widths):
+            gap = gaps[i] if i < len(gaps) else None
+            out += '<w:col w:w="%d"%s/>' % (round(w * k), (' w:space="%d"' % round(gap * k)) if gap is not None else '')
+        return out + '</w:cols>'
+    return re.sub(r'<w:cols(?: [^>]*)?(?:/>|>.*?</w:cols>)', cols, x, flags=re.S)
+
 def nodes(p): return [m.group(2) for m in T.finditer(p)]
 def text(p): return ''.join(nodes(p))
 def set_nodes(p, new):
@@ -92,6 +181,8 @@ def main():
     zin = zipfile.ZipFile(SRC)
     x = zin.read('word/document.xml').decode('utf8')
     x = PARA.sub(lambda m: transform(m.group(0)), x)
+    x = PARA.sub(lambda m: fmt_paragraph(m.group(0), text(m.group(0)).startswith('CONTRAT DE TRAVAIL')), x)
+    x = fmt_sections(x)
     # paragraphe d'essai conditionnel : balises de boucle dans des paragraphes dédiés
     def wrap(m):
         p = m.group(0)

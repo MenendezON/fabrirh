@@ -404,6 +404,17 @@ export type ContractForm = z.infer<ReturnType<typeof contractSchema>>;
 
 // ---------- Rémunération ----------
 
+/** Montant entier en FCFA, facultatif (vide autorisé), sans décimales. */
+const optionalAmount = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/[\s\u202f\u00a0]/g, ""))
+  .refine(
+    (v) => v === "" || /^\d+$/.test(v),
+    "Saisissez un montant entier en FCFA, sans décimales.",
+  )
+  .refine((v) => v === "" || Number(v) <= 100_000_000, "Le montant semble trop élevé.");
+
 export const compensationSchema = z.object({
   amount: z
     .string({ required_error: REQUIRED })
@@ -418,6 +429,12 @@ export const compensationSchema = z.object({
     ),
   effectiveDate: requiredDate("Date d'effet"),
   contractId: optionalUuid,
+  /** Composantes du contrat de travail (facultatives) : montants entiers en FCFA. */
+  baseSalary: optionalAmount.default(""),
+  sursalaire: optionalAmount.default(""),
+  transportAllowance: optionalAmount.default(""),
+  otherBenefits: z.string().trim().max(500, "500 caractères au plus.").default(""),
+  conventionCategory: z.string().trim().max(30, "30 caractères au plus.").default(""),
 });
 export type CompensationForm = z.input<typeof compensationSchema>;
 

@@ -59,7 +59,16 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
 
   const form = useForm<CompensationForm, unknown, Parsed>({
     resolver: zodResolver(compensationSchema),
-    defaultValues: { amount: "", effectiveDate: todayIso(), contractId: "" },
+    defaultValues: {
+      amount: "",
+      effectiveDate: todayIso(),
+      contractId: "",
+      baseSalary: "",
+      sursalaire: "",
+      transportAllowance: "",
+      otherBenefits: "",
+      conventionCategory: "",
+    },
   });
   const { register, control, handleSubmit, reset, formState } = form;
   const errors = formState.errors;
@@ -71,6 +80,11 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
         net_monthly_salary_fcfa: Number(v.amount),
         effective_date: v.effectiveDate,
         contract_id: v.contractId ? v.contractId : null,
+        base_salary_fcfa: v.baseSalary === "" ? null : Number(v.baseSalary),
+        sursalaire_fcfa: v.sursalaire === "" ? null : Number(v.sursalaire),
+        transport_allowance_fcfa: v.transportAllowance === "" ? null : Number(v.transportAllowance),
+        other_benefits: v.otherBenefits === "" ? null : v.otherBenefits,
+        convention_category: v.conventionCategory === "" ? null : v.conventionCategory,
       };
       const { error } =
         editing && editing !== "new"
@@ -88,11 +102,28 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
   const open = (target: CompensationRecord | "new") => {
     reset(
       target === "new"
-        ? { amount: "", effectiveDate: todayIso(), contractId: contracts[0]?.id ?? "" }
+        ? {
+            amount: "",
+            effectiveDate: todayIso(),
+            contractId: contracts[0]?.id ?? "",
+            baseSalary: "",
+            sursalaire: "",
+            transportAllowance: "",
+            otherBenefits: "",
+            conventionCategory: "",
+          }
         : {
             amount: String(target.net_monthly_salary_fcfa),
             effectiveDate: target.effective_date,
             contractId: target.contract_id ?? "",
+            baseSalary: target.base_salary_fcfa === null ? "" : String(target.base_salary_fcfa),
+            sursalaire: target.sursalaire_fcfa === null ? "" : String(target.sursalaire_fcfa),
+            transportAllowance:
+              target.transport_allowance_fcfa === null
+                ? ""
+                : String(target.transport_allowance_fcfa),
+            otherBenefits: target.other_benefits ?? "",
+            conventionCategory: target.convention_category ?? "",
           },
     );
     setEditing(target);
@@ -101,7 +132,7 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
   return (
     <Section
       title="Rémunération"
-      description="Salaire net mensuel en FCFA. Chaque changement crée une ligne datée."
+      description="Salaire net mensuel en FCFA, et composantes utilisées dans le contrat de travail. Chaque changement crée une ligne datée."
       actions={
         canCreate ? (
           <Button size="sm" onClick={() => open("new")}>
@@ -140,6 +171,8 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
                     {c.contract_id &&
                       contracts.find((k) => k.id === c.contract_id) &&
                       ` · ${contractLabel(contracts.find((k) => k.id === c.contract_id)!)}`}
+                    {c.base_salary_fcfa !== null &&
+                      ` · base ${formatFCFA(Number(c.base_salary_fcfa))}`}
                     {delta !== null &&
                       ` · ${delta > 0 ? "+" : ""}${String(delta).replace(".", ",")} %`}
                   </span>
@@ -176,6 +209,60 @@ export function CompensationTab({ ctx }: { ctx: FicheContext }) {
                 placeholder="Ex. 450 000"
                 {...register("amount")}
               />
+            </FormRow>
+            <p className="text-sm font-medium">Composantes du contrat de travail (facultatif)</p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormRow
+                label="Salaire de base"
+                htmlFor="baseSalary"
+                error={errors.baseSalary?.message}
+              >
+                <Input
+                  id="baseSalary"
+                  inputMode="numeric"
+                  className="font-mono"
+                  {...register("baseSalary")}
+                />
+              </FormRow>
+              <FormRow label="Sursalaire" htmlFor="sursalaire" error={errors.sursalaire?.message}>
+                <Input
+                  id="sursalaire"
+                  inputMode="numeric"
+                  className="font-mono"
+                  {...register("sursalaire")}
+                />
+              </FormRow>
+              <FormRow
+                label="Indemnité de transport"
+                htmlFor="transportAllowance"
+                error={errors.transportAllowance?.message}
+              >
+                <Input
+                  id="transportAllowance"
+                  inputMode="numeric"
+                  className="font-mono"
+                  {...register("transportAllowance")}
+                />
+              </FormRow>
+            </div>
+            <FormRow
+              label="Catégorie conventionnelle"
+              htmlFor="conventionCategory"
+              error={errors.conventionCategory?.message}
+              hint="Ex. 7ème. Le salaire brut du contrat = base + sursalaire."
+            >
+              <Input
+                id="conventionCategory"
+                placeholder="7ème"
+                {...register("conventionCategory")}
+              />
+            </FormRow>
+            <FormRow
+              label="Autres avantages"
+              htmlFor="otherBenefits"
+              error={errors.otherBenefits?.message}
+            >
+              <Input id="otherBenefits" {...register("otherBenefits")} />
             </FormRow>
             <FormRow
               label="Date d'effet"

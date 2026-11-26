@@ -336,6 +336,11 @@ export type Database = {
           net_monthly_salary_fcfa: number
           updated_at: string
           updated_by: string | null
+          base_salary_fcfa: number | null
+          convention_category: string | null
+          other_benefits: string | null
+          sursalaire_fcfa: number | null
+          transport_allowance_fcfa: number | null
           contract_id: string | null
         }
         Insert: {
@@ -348,6 +353,11 @@ export type Database = {
           net_monthly_salary_fcfa: number
           updated_at?: string
           updated_by?: string | null
+          base_salary_fcfa?: number | null
+          convention_category?: string | null
+          other_benefits?: string | null
+          sursalaire_fcfa?: number | null
+          transport_allowance_fcfa?: number | null
           contract_id?: string | null
         }
         Update: {
@@ -360,6 +370,11 @@ export type Database = {
           net_monthly_salary_fcfa?: number
           updated_at?: string
           updated_by?: string | null
+          base_salary_fcfa?: number | null
+          convention_category?: string | null
+          other_benefits?: string | null
+          sursalaire_fcfa?: number | null
+          transport_allowance_fcfa?: number | null
           contract_id?: string | null
         }
         Relationships: [

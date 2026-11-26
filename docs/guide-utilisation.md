@@ -104,3 +104,11 @@ Sur téléphone, le menu s'ouvre par le bouton en haut à gauche ; les écrans s
 - À la création d'un contrat, choisissez la **période d'essai** : aucune, 1 mois ou 2 mois. Elle est **renouvelable une seule fois** (même durée) avec le bouton « Renouveler l'essai » dans l'onglet Contrats de la fiche.
 - Le suivi se trouve dans **Contrats → Périodes d'essai** : fin d'essai, temps restant, site et unité.
 - La **DRH et les gestionnaires RH** reçoivent une alerte (cloche, et e-mail si activé) 15 jours avant la fin de l'essai ; ce délai se règle dans Paramètres RH.
+
+### Contrat de travail automatique (CDD)
+
+- Renseignez la **rémunération** de l'employé (onglet Rémunération : base, sursalaire, transport, autres avantages, catégorie conventionnelle), son **affectation** (poste), son identité (naissance, situation, nationalité, pièce d'identité) et son **contrat CDD** (durée, période d'essai).
+- Dans l'onglet **Contrats**, le bouton **Contrat** génère le contrat à partir du modèle de l'entreprise : aperçu à l'écran, puis **Télécharger (.docx)**.
+- Une information absente est laissée en **pointillés** dans le document et listée dans l'avertissement : complétez-la dans Fabri RH puis régénérez, ou dans Word.
+- Salaire brut = base + sursalaire. Le texte s'accorde au féminin (Madame, engagée…) selon le genre de la fiche. La date de signature et le début de l'essai reprennent la date de début du contrat.
+- Le modèle se modifie dans Word (`scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx`), puis `python3 scripts/build-contract-template.py` régénère le modèle balisé. Chaque génération est tracée dans le journal d'audit.

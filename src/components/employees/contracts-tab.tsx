@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogOut, Plus } from "lucide-react";
+import { FileText, LogOut, Plus } from "lucide-react";
 
 import {
   AlertDialog,
@@ -57,6 +57,7 @@ import {
   SubmitButton,
   useEmployeeMutation,
 } from "./common";
+import { ContractPreviewDialog } from "./contract-preview";
 import type { FicheContext } from "./fiche-context";
 
 export function ContractsTab({ ctx }: { ctx: FicheContext }) {
@@ -125,6 +126,7 @@ const MODE_TITLES: Record<ContractMode, string> = {
 
 function ContractsSection({ ctx }: { ctx: FicheContext }) {
   const [dialog, setDialog] = useState<ContractDialog | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const open = dialog !== null;
   const setOpen = (o: boolean) => {
     if (!o) setDialog(null);
@@ -263,7 +265,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                 <th className="px-3 py-2 font-medium">Fin</th>
                 <th className="px-3 py-2 font-medium">Essai</th>
                 <th className="px-3 py-2 font-medium">Origine</th>
-                {canCreate && (
+                {(canCreate || rows.some((r) => r.type === "cdd")) && (
                   <th className="px-3 py-2 font-medium">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -312,9 +314,19 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                         )
                       : "—"}
                   </td>
-                  {canCreate && (
+                  {(canCreate || c.type === "cdd") && (
                     <td className="px-3 py-2 text-right">
-                      {ctx.current?.is_active !== false && canFollowUp(c, rows) && (
+                      {c.type === "cdd" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mr-2"
+                          onClick={() => setPreviewId(c.id)}
+                        >
+                          <FileText /> Contrat
+                        </Button>
+                      )}
+                      {canCreate && ctx.current?.is_active !== false && canFollowUp(c, rows) && (
                         <span className="inline-flex gap-2">
                           <Button
                             size="sm"
@@ -340,6 +352,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
           </table>
         </div>
       )}
+      <ContractPreviewDialog contractId={previewId} onClose={() => setPreviewId(null)} />
       <Dialog
         open={open}
         onOpenChange={(o) => {

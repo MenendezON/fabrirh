@@ -62,7 +62,7 @@ type NavItem = {
   roles?: AppRole[];
   /** Visible seulement si le compte est rattaché à une fiche employé. */
   selfService?: boolean;
-  /** Visible seulement si la base accorde cette permission au rôle de l'utilisateur. */
+  /** Visible seulement si la base accorde cette permission sur d'autres personnes que soi (le libre-service passe par « Mon profil »). */
   permission?: [Resource, Action];
 };
 
@@ -131,12 +131,12 @@ const NAV: NavItem[] = [
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { data: user } = useCurrentUser();
   const signOut = useSignOut();
-  const { can } = usePermissions();
+  const { canBeyondSelf } = usePermissions();
   const items = NAV.filter(
     (item) =>
       (!item.roles || (user?.role && item.roles.includes(user.role))) &&
       (!item.selfService || !!user?.employeeId) &&
-      (!item.permission || can(...item.permission)),
+      (!item.permission || canBeyondSelf(...item.permission)),
   );
 
   return (

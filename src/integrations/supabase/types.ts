@@ -441,6 +441,44 @@ export type Database = {
           },
         ]
       }
+      document_requests: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          kind: string
+          leave_end: string | null
+          leave_start: string | null
+          note: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          employee_id: string
+          id?: string
+          kind: string
+          leave_end?: string | null
+          leave_start?: string | null
+          note?: string | null
+          status?: string
+        }
+        Update: Record<string, never>
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           archived_at: string | null
@@ -2007,6 +2045,14 @@ export type Database = {
       }
       cancel_access_request: {
         Args: { _id: string }
+        Returns: undefined
+      }
+      cancel_document_request: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      review_document_request: {
+        Args: { _fulfill: boolean; _id: string; _note?: string }
         Returns: undefined
       }
       cancel_contact_change: {

@@ -68,7 +68,7 @@ WHERE NOT EXISTS (SELECT 1 FROM public.settings WHERE key = 'notice_days_probati
 
 ALTER TABLE public.notification_recipients DROP CONSTRAINT IF EXISTS notification_recipients_kind_check;
 ALTER TABLE public.notification_recipients ADD CONSTRAINT notification_recipients_kind_check
-  CHECK (kind IN ('contract_ending','retirement_upcoming','contract_to_regularize','document_expiring','probation_ending','*'));
+  CHECK (kind IN ('contract_ending','retirement_upcoming','contract_to_regularize','document_expiring','probation_ending','document_request','*'));
 
 INSERT INTO public.notification_recipients (kind, role)
 SELECT 'probation_ending', r FROM unnest(ARRAY['drh','gestionnaire_rh']::public.app_role[]) r

@@ -113,3 +113,10 @@ Sur téléphone, le menu s'ouvre par le bouton en haut à gauche ; les écrans s
 - Le même modèle sert aux 4 types ; seules quatre formulations changent : titre, « en qualité de… », article 3 (durée) et article 13 (rupture). Un CDI n'a ni durée ni « renouvelable » ; les formulations CDI, stage et consultant sont à faire valider par la direction juridique.
 - Salaire brut = base + sursalaire. Le texte s'accorde au féminin (Madame, engagée…) selon le genre de la fiche. La date de signature et le début de l'essai reprennent la date de début du contrat.
 - Le modèle se modifie dans Word (`scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx`), puis `python3 scripts/build-contract-template.py` régénère le modèle balisé. Chaque génération est tracée dans le journal d'audit.
+
+
+## Demander une attestation (travail ou congé)
+
+**Employé** : dans *Mon profil → Mes attestations*, choisir « Attestation de travail » ou « Attestation de congé » (période facultative), ajouter une précision si besoin, puis *Envoyer la demande*. Une seule demande en attente par type ; elle peut être annulée tant qu'elle n'est pas traitée. La réponse des RH apparaît dans la liste et une notification (cloche + e-mail) est envoyée.
+
+**RH (DRH, gestionnaires RH)** : chaque demande déclenche une notification. La page *Demandes d'attestation* permet de la marquer « délivrée » (avec un message, par ex. « à retirer au bureau RH ») ou de la refuser. Le document lui-même est préparé par les RH ; l'application suit la demande et prévient l'employé.

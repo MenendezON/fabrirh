@@ -9,6 +9,7 @@ import { ContractsTab } from "@/components/employees/contracts-tab";
 import { DocumentsTab } from "@/components/employees/documents-tab";
 import type { FicheContext } from "@/components/employees/fiche-context";
 import { IdentityTab } from "@/components/employees/identity-tab";
+import { MyDocumentRequestsTab } from "@/components/employees/my-documents-requests-tab";
 import { MyContactTab } from "@/components/employees/my-contact-tab";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +17,7 @@ import { employeeQuery, fullName, initials } from "@/lib/employees";
 import { usePermissions } from "@/lib/permissions";
 import { useCurrentUser } from "@/lib/roles";
 
-const TABS = ["infos", "poste", "contrats", "remuneration", "documents", "coordonnees"] as const;
+const TABS = ["infos", "poste", "contrats", "remuneration", "documents", "attestations", "coordonnees"] as const;
 type Tab = (typeof TABS)[number];
 const isTab = (v: unknown): v is Tab =>
   typeof v === "string" && (TABS as readonly string[]).includes(v);
@@ -114,6 +115,7 @@ function MyProfilePage() {
           <TabsTrigger value="contrats">Mes contrats</TabsTrigger>
           <TabsTrigger value="remuneration">Ma rémunération</TabsTrigger>
           <TabsTrigger value="documents">Mes documents</TabsTrigger>
+          <TabsTrigger value="attestations">Mes attestations</TabsTrigger>
           <TabsTrigger value="coordonnees">Mes coordonnées</TabsTrigger>
         </TabsList>
         <TabsContent value="infos">
@@ -138,6 +140,9 @@ function MyProfilePage() {
           ) : (
             <NoAccess title="Documents" />
           )}
+        </TabsContent>
+        <TabsContent value="attestations">
+          <MyDocumentRequestsTab employeeId={employeeId} />
         </TabsContent>
         <TabsContent value="coordonnees">
           <MyContactTab

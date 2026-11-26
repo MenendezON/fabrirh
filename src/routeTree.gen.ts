@@ -24,6 +24,7 @@ import { Route as AuthenticatedAideRouteImport } from './routes/_authenticated/a
 import { Route as AuthenticatedApiClesRouteImport } from './routes/_authenticated/api-cles'
 import { Route as AuthenticatedApiDocsRouteImport } from './routes/_authenticated/api-docs'
 import { Route as AuthenticatedDemandesAccesRouteImport } from './routes/_authenticated/demandes-acces'
+import { Route as AuthenticatedDemandesAttestationsRouteImport } from './routes/_authenticated/demandes-attestations'
 import { Route as AuthenticatedDemandesCoordonneesRouteImport } from './routes/_authenticated/demandes-coordonnees'
 import { Route as AuthenticatedDocumentationRouteImport } from './routes/_authenticated/documentation'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
@@ -117,6 +118,12 @@ const AuthenticatedDemandesAccesRoute =
   AuthenticatedDemandesAccesRouteImport.update({
     id: '/demandes-acces',
     path: '/demandes-acces',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDemandesAttestationsRoute =
+  AuthenticatedDemandesAttestationsRouteImport.update({
+    id: '/demandes-attestations',
+    path: '/demandes-attestations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDemandesCoordonneesRoute =
@@ -237,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/api-cles': typeof AuthenticatedApiClesRoute
   '/api-docs': typeof AuthenticatedApiDocsRoute
   '/demandes-acces': typeof AuthenticatedDemandesAccesRoute
+  '/demandes-attestations': typeof AuthenticatedDemandesAttestationsRoute
   '/demandes-coordonnees': typeof AuthenticatedDemandesCoordonneesRoute
   '/documentation': typeof AuthenticatedDocumentationRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -271,6 +279,7 @@ export interface FileRoutesByTo {
   '/api-cles': typeof AuthenticatedApiClesRoute
   '/api-docs': typeof AuthenticatedApiDocsRoute
   '/demandes-acces': typeof AuthenticatedDemandesAccesRoute
+  '/demandes-attestations': typeof AuthenticatedDemandesAttestationsRoute
   '/demandes-coordonnees': typeof AuthenticatedDemandesCoordonneesRoute
   '/documentation': typeof AuthenticatedDocumentationRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -307,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/api-cles': typeof AuthenticatedApiClesRoute
   '/_authenticated/api-docs': typeof AuthenticatedApiDocsRoute
   '/_authenticated/demandes-acces': typeof AuthenticatedDemandesAccesRoute
+  '/_authenticated/demandes-attestations': typeof AuthenticatedDemandesAttestationsRoute
   '/_authenticated/demandes-coordonnees': typeof AuthenticatedDemandesCoordonneesRoute
   '/_authenticated/documentation': typeof AuthenticatedDocumentationRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
@@ -343,6 +353,7 @@ export interface FileRouteTypes {
     | '/api-cles'
     | '/api-docs'
     | '/demandes-acces'
+    | '/demandes-attestations'
     | '/demandes-coordonnees'
     | '/documentation'
     | '/journal'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/api-cles'
     | '/api-docs'
     | '/demandes-acces'
+    | '/demandes-attestations'
     | '/demandes-coordonnees'
     | '/documentation'
     | '/journal'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/api-cles'
     | '/_authenticated/api-docs'
     | '/_authenticated/demandes-acces'
+    | '/_authenticated/demandes-attestations'
     | '/_authenticated/demandes-coordonnees'
     | '/_authenticated/documentation'
     | '/_authenticated/journal'
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandesAccesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/demandes-attestations': {
+      id: '/_authenticated/demandes-attestations'
+      path: '/demandes-attestations'
+      fullPath: '/demandes-attestations'
+      preLoaderRoute: typeof AuthenticatedDemandesAttestationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/demandes-coordonnees': {
       id: '/_authenticated/demandes-coordonnees'
       path: '/demandes-coordonnees'
@@ -690,6 +710,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedApiClesRoute: typeof AuthenticatedApiClesRoute
   AuthenticatedApiDocsRoute: typeof AuthenticatedApiDocsRoute
   AuthenticatedDemandesAccesRoute: typeof AuthenticatedDemandesAccesRoute
+  AuthenticatedDemandesAttestationsRoute: typeof AuthenticatedDemandesAttestationsRoute
   AuthenticatedDemandesCoordonneesRoute: typeof AuthenticatedDemandesCoordonneesRoute
   AuthenticatedDocumentationRoute: typeof AuthenticatedDocumentationRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
@@ -714,6 +735,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApiClesRoute: AuthenticatedApiClesRoute,
   AuthenticatedApiDocsRoute: AuthenticatedApiDocsRoute,
   AuthenticatedDemandesAccesRoute: AuthenticatedDemandesAccesRoute,
+  AuthenticatedDemandesAttestationsRoute:
+    AuthenticatedDemandesAttestationsRoute,
   AuthenticatedDemandesCoordonneesRoute: AuthenticatedDemandesCoordonneesRoute,
   AuthenticatedDocumentationRoute: AuthenticatedDocumentationRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,

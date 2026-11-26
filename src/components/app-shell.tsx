@@ -9,6 +9,7 @@ import {
   FileSearch,
   ShieldCheck,
   BookOpen,
+  FileCheck,
   FileText,
   KeyRound,
   ChartColumn,
@@ -42,6 +43,7 @@ type NavItem = {
     | "/mon-profil"
     | "/demandes-coordonnees"
     | "/demandes-acces"
+    | "/demandes-attestations"
     | "/tableau-de-bord"
     | "/permissions"
     | "/acces-documents"
@@ -80,6 +82,12 @@ const NAV: NavItem[] = [
     to: "/demandes-coordonnees",
     label: "Demandes de coordonnées",
     icon: ClipboardCheck,
+    permission: ["employees", "edit"],
+  },
+  {
+    to: "/demandes-attestations",
+    label: "Demandes d'attestation",
+    icon: FileCheck,
     permission: ["employees", "edit"],
   },
   {

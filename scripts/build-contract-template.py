@@ -2,13 +2,13 @@
 """Fabrique le modèle balisé du CDD (docxtemplater) à partir du modèle Word d'origine.
 
 Usage : python3 scripts/build-contract-template.py
-Entrée : scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx  — Sortie : src/assets/contract-templates/contract.docx
+Entrée : scripts/MODELE_CONTRAT.docx  — Sortie : src/assets/contract-templates/contract.docx
 Les « …… » du modèle deviennent des balises {nom}, le texte juridique n'est pas modifié ; les accords
 masculin/féminin passent par {civilite}, {il}, {Il}, {engage}, {dénomme_e}, {e}.
 """
 import re, shutil, sys, zipfile
 
-SRC = "scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx"
+SRC = "scripts/MODELE_CONTRAT.docx"
 DST = "src/assets/contract-templates/contract.docx"
 T = re.compile(r'(<w:t(?: [^>]*)?>)([^<]*)(</w:t>)')
 DOTS = re.compile(r'^[\s .…]*$')

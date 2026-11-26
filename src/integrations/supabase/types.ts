@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          note: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          id?: string
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          note?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_call_log: {
         Row: {
           client_id: string
@@ -1911,6 +1955,18 @@ export type Database = {
       }
     }
     Functions: {
+      employee_has_account: {
+        Args: { _employee_id: string }
+        Returns: boolean
+      }
+      review_access_request: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: undefined
+      }
+      cancel_access_request: {
+        Args: { _id: string }
+        Returns: undefined
+      }
       cancel_contact_change: {
         Args: { _id: string }
         Returns: undefined

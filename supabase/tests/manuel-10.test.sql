@@ -31,7 +31,7 @@ DECLARE
 BEGIN
   -- Dossiers préparés : un seul porteur de l'e-mail, deux porteurs d'un autre e-mail, deux dossiers libres.
   INSERT INTO public.employees (matricule, first_names, last_name, email) VALUES ('T10-MATCH', 'Awa', 'Ndiaye', 'awa.ndiaye@test.local') RETURNING id INTO e_match;
-  INSERT INTO public.employees (matricule, first_names, last_name, email) VALUES ('T10-DUP1', 'A', 'Dup', 'dup@test.local') RETURNING id INTO e_dup1;
+  INSERT INTO public.employees (matricule, first_names, last_name, professional_email) VALUES ('T10-DUP1', 'A', 'Dup', 'dup@test.local') RETURNING id INTO e_dup1;
   INSERT INTO public.employees (matricule, first_names, last_name, professional_email) VALUES ('T10-DUP2', 'B', 'Dup', 'DUP@test.local') RETURNING id INTO e_dup2;
   INSERT INTO public.employees (matricule, first_names, last_name, email) VALUES ('T10-FREE', 'Libre', 'Un', 'libre1@test.local') RETURNING id INTO e_free;
   INSERT INTO public.employees (matricule, first_names, last_name, email) VALUES ('T10-FREE2', 'Libre', 'Deux', 'libre2@test.local') RETURNING id INTO e_free2;
@@ -47,7 +47,7 @@ BEGIN
   PERFORM pg_temp.chk((SELECT matricule FROM public.employees WHERE id = emp) ~ '^PROV-[0-9]{4,}$', 'matricule provisoire PROV-nnnn');
   PERFORM pg_temp.chk((SELECT last_name FROM public.employees WHERE id = emp) = 'DIATTA'
                       AND (SELECT first_names FROM public.employees WHERE id = emp) = 'Marthe Onésima', 'nom : dernier mot = nom de famille, le reste = prénoms');
-  PERFORM pg_temp.chk((SELECT email FROM public.employees WHERE id = emp) = 'marthe@test.local', 'l''e-mail du compte est repris sur le dossier');
+  PERFORM pg_temp.chk((SELECT professional_email FROM public.employees WHERE id = emp) = 'marthe@test.local', 'l''adresse du compte devient l''e-mail professionnel du dossier');
   PERFORM pg_temp.chk(EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = u_new AND role = 'employe' AND archived_at IS NULL), 'le rôle employé est attribué automatiquement');
 
   INSERT INTO auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at)

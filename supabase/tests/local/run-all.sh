@@ -15,12 +15,12 @@ for f in drizzle/migrations/*.sql; do
 done
 $P -f supabase/seed.sql 2>&1 | grep -v NOTICE | head -3
 for pass in 1 2; do
-  for f in docs/sql-manuel/0*.sql; do
+  for f in docs/sql-manuel/[01]*.sql; do
     $P -f "$f" 2>&1 | grep -v NOTICE | sed "s|^|[$f passe $pass] |" | head -3
   done
 done
 fail=0
-for t in permissions rules notifications manuel-01-02 manuel-03-04 manuel-05 manuel-08-09; do
+for t in permissions rules notifications manuel-01-02 manuel-03-04 manuel-05 manuel-08-09 manuel-10 manuel-11; do
   res=$(psql -d $DB -q -f supabase/tests/$t.test.sql 2>&1 | grep -m1 "RÉSULTATS")
   echo "$t : ${res:-PAS DE RÉSULTAT}"
   case "$res" in *" 0 échec"*) ;; *) fail=1;; esac

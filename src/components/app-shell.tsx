@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { installGlobalErrorLogging } from "@/lib/log";
 import { Link } from "@tanstack/react-router";
 import {
+  UserPlus,
   CalendarClock,
   FileCode,
   FileSearch,
@@ -40,6 +41,7 @@ type NavItem = {
     | "/accueil"
     | "/mon-profil"
     | "/demandes-coordonnees"
+    | "/demandes-acces"
     | "/tableau-de-bord"
     | "/permissions"
     | "/acces-documents"
@@ -79,6 +81,12 @@ const NAV: NavItem[] = [
     label: "Demandes de coordonnées",
     icon: ClipboardCheck,
     permission: ["employees", "edit"],
+  },
+  {
+    to: "/demandes-acces",
+    label: "Demandes d'accès",
+    icon: UserPlus,
+    permission: ["users", "create"],
   },
   { to: "/organigramme", label: "Organigramme", icon: Network, permission: ["employees", "view"] },
   {

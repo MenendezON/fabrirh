@@ -43,6 +43,8 @@ import {
 } from "./common";
 import type { FicheContext } from "./fiche-context";
 
+const isProvisional = (m: string) => /^PROV-\d+$/.test(m);
+
 export function IdentityTab({ ctx }: { ctx: FicheContext }) {
   return (
     <div className="space-y-6">
@@ -85,8 +87,9 @@ function CivilSection({ ctx }: { ctx: FicheContext }) {
   const save = useEmployeeMutation(
     ctx.id,
     async (values: EmployeeForm) => {
-      const { matricule: _kept, ...payload } = toEmployeePayload(values); // le matricule est permanent
-      void _kept;
+      const { matricule, ...rest } = toEmployeePayload(values);
+      // Le matricule est permanent, sauf s'il est encore provisoire (PROV-…) : il peut alors être remplacé une fois.
+      const payload = isProvisional(ctx.record.matricule) && matricule ? { ...rest, matricule } : rest;
       const { error } = await supabase.from("employees").update(payload).eq("id", ctx.id);
       if (error) throw error;
     },
@@ -158,9 +161,20 @@ function CivilSection({ ctx }: { ctx: FicheContext }) {
           className="grid gap-4 px-5 py-5 sm:grid-cols-2"
           noValidate
         >
-          <FormRow label="Matricule" hint="Permanent : il ne peut pas être modifié.">
-            <Input value={r.matricule} disabled className="font-mono" />
-          </FormRow>
+          {isProvisional(r.matricule) ? (
+            <FormRow
+              label="Matricule"
+              htmlFor="matricule"
+              error={errors.matricule?.message}
+              hint="Provisoire : saisissez le vrai matricule. Une fois enregistré, il sera permanent."
+            >
+              <Input id="matricule" className="font-mono" {...register("matricule")} />
+            </FormRow>
+          ) : (
+            <FormRow label="Matricule" hint="Permanent : il ne peut pas être modifié.">
+              <Input value={r.matricule} disabled className="font-mono" />
+            </FormRow>
+          )}
           <span className="hidden sm:block" />
           <FormRow label="Nom" htmlFor="lastName" error={errors.lastName?.message}>
             <Input

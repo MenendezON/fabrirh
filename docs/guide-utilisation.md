@@ -92,3 +92,9 @@ Détails techniques pour les développeurs : `docs/api.md`.
 
 Sur téléphone, le menu s'ouvre par le bouton en haut à gauche ; les écrans s'adaptent à la largeur.
 
+### Comptes et dossiers (automatique)
+
+- Chaque compte créé reçoit **automatiquement un dossier employé** et le rôle « Employé » (il ne voit que ses données). Si un dossier non lié porte la même adresse e-mail, il est utilisé ; sinon un dossier est créé avec un matricule provisoire `PROV-0001`…
+- Un matricule provisoire se remplace **une seule fois** (onglet Identité → Modifier) ; ensuite il est permanent.
+- **DRH / gestionnaire RH** : sur la fiche d'un employé sans compte, bouton **Demander l'accès**. L'**admin IT** traite la demande dans **Demandes d'accès** (accepter = invitation par e-mail, ou refuser). L'admin IT peut aussi cliquer directement **Donner l'accès**.
+- Rôles DRH, gestionnaire RH, paie et admin IT : terminez la double authentification, sinon aucun droit n'est actif.

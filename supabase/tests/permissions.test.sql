@@ -37,6 +37,9 @@ BEGIN
   FROM (VALUES (u_admin, 'admin'), (u_drh, 'drh'), (u_gest, 'gest'), (u_paie, 'paie'), (u_mgr, 'mgr'),
                (u_dir, 'dir'), (u_aud, 'aud'), (u_site, 'site')) v(u, e)
   ORDER BY (e <> 'admin');
+  -- chaque compte reçoit automatiquement un dossier (script 10) : on les retire pour garder les 40 dossiers de démonstration
+  UPDATE public.profiles SET employee_id = NULL WHERE id IN (u_admin, u_drh, u_gest, u_paie, u_mgr, u_dir, u_aud, u_site);
+  DELETE FROM public.employees WHERE matricule LIKE 'PROV-%';
   -- le premier compte reçoit admin_it + drh : on ne garde que admin_it pour ce test
   DELETE FROM public.user_roles WHERE user_id = u_admin AND role = 'drh';
   DELETE FROM public.user_roles WHERE user_id <> u_admin AND user_id IN (u_drh, u_gest, u_paie, u_mgr, u_dir, u_aud, u_site);

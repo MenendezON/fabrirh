@@ -28,6 +28,17 @@ export function hasPermission(
   return (rows ?? []).some((p) => p.resource === resource && p.action === action);
 }
 
+/** Comme hasPermission, mais ignore les droits limités à « ses propres données » (rôle employé). */
+export function hasBroadPermission(
+  rows: PermissionRow[] | undefined,
+  resource: Resource,
+  action: Action,
+) {
+  return (rows ?? []).some(
+    (p) => p.resource === resource && p.action === action && p.scope !== "self",
+  );
+}
+
 export const myPermissionsQuery = queryOptions({
   queryKey: ["my-permissions"],
   queryFn: async () => {
@@ -44,6 +55,9 @@ export function usePermissions() {
   return {
     ready: query.isSuccess,
     can: (resource: Resource, action: Action) => hasPermission(query.data, resource, action),
+    /** Droit sur d'autres personnes que soi (exclut le libre-service). */
+    canBeyondSelf: (resource: Resource, action: Action) =>
+      hasBroadPermission(query.data, resource, action),
   };
 }
 

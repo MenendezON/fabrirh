@@ -2,14 +2,14 @@
 """Fabrique le modèle balisé du CDD (docxtemplater) à partir du modèle Word d'origine.
 
 Usage : python3 scripts/build-contract-template.py
-Entrée : scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx  — Sortie : src/assets/contract-templates/cdd.docx
+Entrée : scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx  — Sortie : src/assets/contract-templates/contract.docx
 Les « …… » du modèle deviennent des balises {nom}, le texte juridique n'est pas modifié ; les accords
 masculin/féminin passent par {civilite}, {il}, {Il}, {engage}, {dénomme_e}, {e}.
 """
 import re, shutil, sys, zipfile
 
 SRC = "scripts/MODELE_CDD_HOMME_SEBIKHOTANE.docx"
-DST = "src/assets/contract-templates/cdd.docx"
+DST = "src/assets/contract-templates/contract.docx"
 T = re.compile(r'(<w:t(?: [^>]*)?>)([^<]*)(</w:t>)')
 DOTS = re.compile(r'^[\s .…]*$')
 HAS_DOTS = lambda n: n.strip(' \u00a0') != '' and DOTS.match(n) is not None
@@ -52,9 +52,17 @@ def transform(p):
             if n == 'ème': out[k] = ''
         if n == 'est engagé': out[k] = 'est engagé{e}'
         if full.startswith('Le Travailleur est engagé pour') and n.startswith('Le Travailleur est engagé'): out[k] = n.replace('est engagé', 'est engagé{e}')
-    # --- durée et essai
+    # --- nature du contrat (CDD / CDI / stage / consultant) : mêmes articles, formulations variables
     for k, n in enumerate(ns):
-        if n == ' de 6 mois renouvelable': out[k] = ' de {duree_mois} mois renouvelable'
+        if n == ' DETERMINEE': out[k] = ' {titre_duree}'
+        if full.startswith('Le présent contrat est conclu conformément'):
+            out[k] = n.replace('Contrat à Durée Déterminée (CDD)', '{qualite_contrat}')
+        if full.startswith('Le présent contrat est conclu pour une durée'):
+            if n == ' déterminée': out[k] = ' {nature_duree}'
+            if n == ' de 6 mois renouvelable': out[k] = '{precision_duree}'
+        if full.startswith('Il ne peut être mis fin avant terme'): out[k] = '{phrase_rupture}'
+    # --- essai
+    for k, n in enumerate(ns):
         if full.startswith('Au préalable'):
             if n == '1 Mois': out[k] = '{essai_duree}'
             if HAS_DOTS(n) and len(n.strip()) > 5: out[k] = '{essai_debut}'
@@ -101,7 +109,7 @@ def main():
     b64 = base64.b64encode(open(DST, 'rb').read()).decode()
     open(DST.replace('.docx', '-template.ts'), 'w').write(
         '// Généré par scripts/build-contract-template.py — ne pas modifier à la main.\n'
-        'export const CDD_TEMPLATE_BASE64 =\n  "' + b64 + '";\n')
+        'export const CONTRACT_TEMPLATE_BASE64 =\n  "' + b64 + '";\n')
     print('OK', DST)
 
 if __name__ == '__main__': main()

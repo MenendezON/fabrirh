@@ -6,6 +6,7 @@ import {
   buildContractValues,
   contractFileName,
   type ContractDocInput,
+  type ContractKind,
 } from "@/lib/contract-document";
 
 export type ContractDocumentResult = {
@@ -17,7 +18,7 @@ export type ContractDocumentResult = {
 };
 
 /**
- * Génère le contrat de travail (CDD) d'un employé à partir du modèle de l'entreprise. Toutes les lectures
+ * Génère le contrat de travail (CDD, CDI, stage ou consultant) d'un employé à partir du modèle de l'entreprise. Toutes les lectures
  * passent par la session de l'utilisateur : la base applique ses droits (contrat, rémunération, identité).
  */
 export const generateContractDocument = createServerFn({ method: "POST" })
@@ -34,10 +35,6 @@ export const generateContractDocument = createServerFn({ method: "POST" })
       .is("archived_at", null)
       .maybeSingle();
     if (!contract) throw new Error("Contrat introuvable, ou accès refusé.");
-    if (contract.type !== "cdd") {
-      throw new Error("Le modèle de contrat n'est disponible que pour les CDD pour le moment.");
-    }
-
     const [{ data: employee }, { data: current }, { data: sensitive }, { data: pay }] =
       await Promise.all([
         sb
@@ -83,12 +80,12 @@ export const generateContractDocument = createServerFn({ method: "POST" })
         ? { type: sensitive.id_document_type, number: sensitive.id_document_number }
         : null,
       jobTitle: current?.job_title_name ?? null,
-      contract,
+      contract: { ...contract, type: contract.type as ContractKind },
       compensation,
     };
     const { values, missing } = buildContractValues(input);
-    const { renderCddDocx } = await import("@/lib/contract-render.server");
-    const base64 = renderCddDocx(values);
+    const { renderContractDocx } = await import("@/lib/contract-render.server");
+    const base64 = renderContractDocx(values);
 
     // Trace : un contrat contient des données personnelles et salariales.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -101,5 +98,9 @@ export const generateContractDocument = createServerFn({ method: "POST" })
       new_data: { event: "contract_generated", employee_id: contract.employee_id },
     });
 
-    return { fileName: contractFileName(employee, contract.start_date), base64, missing };
+    return {
+      fileName: contractFileName(employee, contract.start_date, contract.type as ContractKind),
+      base64,
+      missing,
+    };
   });

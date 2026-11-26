@@ -9,7 +9,7 @@ import {
   longDate,
   type ContractDocInput,
 } from "./contract-document";
-import { renderCddDocx } from "./contract-render.server";
+import { renderContractDocx } from "./contract-render.server";
 
 const FULL: ContractDocInput = {
   employee: {
@@ -23,7 +23,7 @@ const FULL: ContractDocInput = {
   },
   idDocument: { type: "cni", number: "1 234 567 890 123" },
   jobTitle: "Soudeur",
-  contract: { start_date: "2026-12-01", duration_months: 6, probation_months: 1 },
+  contract: { type: "cdd", start_date: "2026-12-01", duration_months: 6, probation_months: 1 },
   compensation: {
     base_salary_fcfa: 250000,
     sursalaire_fcfa: 50000,
@@ -82,9 +82,41 @@ describe("contrat de travail — valeurs", () => {
   });
 });
 
+describe("contrat de travail — autres types", () => {
+  const render = (type: "cdi" | "stage" | "consultant", extra = {}) => {
+    const input = { ...FULL, contract: { ...FULL.contract, type, ...extra } };
+    return textOf(renderContractDocx(buildContractValues(input).values));
+  };
+  it("CDI : durée indéterminée, sans durée à saisir", () => {
+    const { missing } = buildContractValues({
+      ...FULL,
+      contract: { ...FULL.contract, type: "cdi", duration_months: null },
+    });
+    expect(missing).not.toContain("Durée du contrat");
+    const text = render("cdi", { duration_months: null });
+    expect(text).toContain("CONTRAT DE TRAVAIL A DUREE INDETERMINEE");
+    expect(text).toContain("en qualité Contrat à Durée Indéterminée (CDI)");
+    expect(text).toContain("conclu pour une durée indéterminée.");
+    expect(text).not.toContain("renouvelable");
+    expect(text).toContain("Le présent contrat à durée indéterminée peut être rompu");
+    expect(text).not.toContain("avant terme");
+    expect(text).not.toMatch(/[{}]/);
+  });
+  it("stage et consultant : même modèle, durée déterminée", () => {
+    expect(render("stage")).toContain("en qualité Contrat de Stage");
+    expect(render("consultant")).toContain("en qualité Contrat de Consultant");
+    expect(render("stage")).toContain("durée déterminée de 6 mois renouvelable");
+  });
+  it("le nom du fichier reprend le type", () => {
+    expect(contractFileName({ first_names: "A", last_name: "B" }, "2026-12-01", "cdi")).toBe(
+      "CDI_B_A_2026-12-01.docx",
+    );
+  });
+});
+
 describe("contrat de travail — document Word", () => {
   it("remplit le modèle sans balise ni pointillé restants", () => {
-    const text = textOf(renderCddDocx(buildContractValues(FULL).values));
+    const text = textOf(renderContractDocx(buildContractValues(FULL).values));
     expect(text).not.toMatch(/[{}]/);
     expect(text).not.toContain("…");
     expect(text).toContain("Nom du Travailleur :   Mamadou Lamine DIOP");
@@ -105,7 +137,7 @@ describe("contrat de travail — document Word", () => {
       ...FULL,
       contract: { ...FULL.contract, probation_months: null },
     });
-    const text = textOf(renderCddDocx(values));
+    const text = textOf(renderContractDocx(values));
     expect(text).not.toContain("période d’essai");
   });
   it("féminise le texte", () => {
@@ -113,7 +145,7 @@ describe("contrat de travail — document Word", () => {
       ...FULL,
       employee: { ...FULL.employee, gender: "F", first_names: "Awa" },
     });
-    const text = textOf(renderCddDocx(values));
+    const text = textOf(renderContractDocx(values));
     expect(text).toContain("Madame Awa DIOP est engagée par la Société");
     expect(text).toContain("Ci-après dénommée");
     expect(text).toContain("Elle déclare en outre n’être tenue par aucune clause");

@@ -265,7 +265,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                 <th className="px-3 py-2 font-medium">Fin</th>
                 <th className="px-3 py-2 font-medium">Essai</th>
                 <th className="px-3 py-2 font-medium">Origine</th>
-                {(canCreate || rows.some((r) => r.type === "cdd")) && (
+                {true && (
                   <th className="px-3 py-2 font-medium">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -314,9 +314,9 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                         )
                       : "—"}
                   </td>
-                  {(canCreate || c.type === "cdd") && (
+                  {true && (
                     <td className="px-3 py-2 text-right">
-                      {c.type === "cdd" && (
+                      {
                         <Button
                           size="sm"
                           variant="outline"
@@ -325,7 +325,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                         >
                           <FileText /> Contrat
                         </Button>
-                      )}
+                      }
                       {canCreate && ctx.current?.is_active !== false && canFollowUp(c, rows) && (
                         <span className="inline-flex gap-2">
                           <Button

@@ -36,6 +36,21 @@ export function amount(n: number | null | undefined): string {
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+export type ContractKind = "cdd" | "cdi" | "stage" | "consultant";
+
+const QUALITE: Record<ContractKind, string> = {
+  cdd: "Contrat à Durée Déterminée (CDD)",
+  cdi: "Contrat à Durée Indéterminée (CDI)",
+  stage: "Contrat de Stage",
+  consultant: "Contrat de Consultant",
+};
+
+/** Article 13 : un contrat à durée déterminée ne peut être rompu avant terme que dans trois cas. */
+const RUPTURE_DETERMINEE =
+  "Il ne peut être mis fin avant terme à un contrat à durée déterminée qu’en cas de faute lourde, d’accord partie constaté par écrit, ou de force majeure et ce, sous réserve du respect des dispositions légales et conventionnelles en la matière.";
+const RUPTURE_INDETERMINEE =
+  "Le présent contrat à durée indéterminée peut être rompu par l’une ou l’autre des parties dans le respect des dispositions légales et conventionnelles en la matière, notamment en ce qui concerne le préavis et les motifs de rupture.";
+
 export type ContractDocInput = {
   employee: {
     first_names: string;
@@ -49,6 +64,7 @@ export type ContractDocInput = {
   idDocument: { type: string | null; number: string | null } | null;
   jobTitle: string | null;
   contract: {
+    type: ContractKind;
     start_date: string;
     duration_months: number | null;
     probation_months: number | null;
@@ -113,7 +129,8 @@ export function buildContractValues(input: ContractDocInput): {
   const sursalaire = k?.sursalaire_fcfa ?? (base === null ? null : 0);
   const transport = k?.transport_allowance_fcfa ?? (base === null ? null : 0);
   const category = need(k?.convention_category, "Catégorie conventionnelle (onglet Rémunération)");
-  const duration = need(c.duration_months, "Durée du contrat");
+  const open = c.type === "cdi";
+  const duration = open ? null : need(c.duration_months, "Durée du contrat");
 
   const probation = c.probation_months;
   const full = `${e.first_names.trim()} ${e.last_name.trim().toUpperCase()}`.trim();
@@ -131,7 +148,11 @@ export function buildContractValues(input: ContractDocInput): {
     piece_identite: piece ?? BLANK,
     poste: job ?? BLANK,
     categorie_conv: category ?? BLANK,
-    duree_mois: duration === null ? BLANK : String(duration),
+    titre_duree: open ? "INDETERMINEE" : "DETERMINEE",
+    qualite_contrat: QUALITE[c.type],
+    nature_duree: open ? "indéterminée" : "déterminée",
+    precision_duree: open ? "" : ` de ${duration === null ? BLANK : duration} mois renouvelable`,
+    phrase_rupture: open ? RUPTURE_INDETERMINEE : RUPTURE_DETERMINEE,
     avec_essai: probation !== null && probation !== undefined,
     essai_duree: probation ? `${probation} mois` : "",
     essai_debut: longDate(c.start_date),
@@ -150,6 +171,7 @@ export function buildContractValues(input: ContractDocInput): {
 export function contractFileName(
   employee: { first_names: string; last_name: string },
   startDate: string,
+  type: ContractKind = "cdd",
 ): string {
   const clean = (s: string) =>
     s
@@ -157,5 +179,5 @@ export function contractFileName(
       .replace(/[̀-ͯ]/g, "")
       .replace(/[^A-Za-z0-9]+/g, "_")
       .replace(/^_+|_+$/g, "");
-  return `CDD_${clean(employee.last_name).toUpperCase()}_${clean(employee.first_names)}_${startDate}.docx`;
+  return `${type.toUpperCase()}_${clean(employee.last_name).toUpperCase()}_${clean(employee.first_names)}_${startDate}.docx`;
 }

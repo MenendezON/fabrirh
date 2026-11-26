@@ -432,6 +432,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           duration_months: number | null
+          probation_months: number | null
+          probation_renewed: boolean
           employee_id: string
           end_date: string | null
           id: string
@@ -447,6 +449,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           duration_months?: number | null
+          probation_months?: number | null
+          probation_renewed?: boolean
           employee_id: string
           end_date?: string | null
           id?: string
@@ -462,6 +466,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           duration_months?: number | null
+          probation_months?: number | null
+          probation_renewed?: boolean
           employee_id?: string
           end_date?: string | null
           id?: string
@@ -1756,6 +1762,25 @@ export type Database = {
       }
     }
     Views: {
+      v_probation: {
+        Row: {
+          can_renew: boolean | null
+          contract_id: string | null
+          contract_start: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"] | null
+          days_remaining: number | null
+          employee_id: string | null
+          first_names: string | null
+          last_name: string | null
+          matricule: string | null
+          org_unit_id: string | null
+          primary_site_id: string | null
+          probation_end: string | null
+          probation_months: number | null
+          probation_renewed: boolean | null
+        }
+        Relationships: []
+      }
       v_contract_alerts: {
         Row: {
           contract_end: string | null
@@ -1955,6 +1980,8 @@ export type Database = {
       }
     }
     Functions: {
+      renew_probation: { Args: { _contract_id: string }; Returns: undefined }
+      generate_probation_notifications: { Args: never; Returns: number }
       employee_has_account: {
         Args: { _employee_id: string }
         Returns: boolean

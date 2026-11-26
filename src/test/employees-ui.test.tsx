@@ -400,7 +400,7 @@ describe("module Employés (rendu réel)", () => {
       await screen.findByRole("button", { name: /Nouveau contrat/ }, { timeout: 5000 }),
     );
     const dialog = await screen.findByRole("dialog");
-    fireEvent.keyDown(within(dialog).getByRole("combobox"), { key: "ArrowDown" });
+    fireEvent.keyDown(within(dialog).getAllByRole("combobox")[0]!, { key: "ArrowDown" });
     fireEvent.click(await screen.findByRole("option", { name: "CDD" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Enregistrer" }));
     expect(

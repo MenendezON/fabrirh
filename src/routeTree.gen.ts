@@ -35,6 +35,7 @@ import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authen
 import { Route as AuthenticatedUtilisateursRouteImport } from './routes/_authenticated/utilisateurs'
 import { Route as AuthenticatedContratsARegulariserRouteImport } from './routes/_authenticated/contrats/a-regulariser'
 import { Route as AuthenticatedContratsEcheancesRouteImport } from './routes/_authenticated/contrats/echeances'
+import { Route as AuthenticatedContratsEssaiRouteImport } from './routes/_authenticated/contrats/essai'
 import { Route as AuthenticatedContratsRetraitesRouteImport } from './routes/_authenticated/contrats/retraites'
 import { Route as AuthenticatedEmployesIndexRouteImport } from './routes/_authenticated/employes/index'
 import { Route as AuthenticatedEmployesEmployeeIdRouteImport } from './routes/_authenticated/employes/$employeeId'
@@ -181,6 +182,12 @@ const AuthenticatedContratsEcheancesRoute =
     path: '/contrats/echeances',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContratsEssaiRoute =
+  AuthenticatedContratsEssaiRouteImport.update({
+    id: '/contrats/essai',
+    path: '/contrats/essai',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContratsRetraitesRoute =
   AuthenticatedContratsRetraitesRouteImport.update({
     id: '/contrats/retraites',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof AuthenticatedUtilisateursRoute
   '/contrats/a-regulariser': typeof AuthenticatedContratsARegulariserRoute
   '/contrats/echeances': typeof AuthenticatedContratsEcheancesRoute
+  '/contrats/essai': typeof AuthenticatedContratsEssaiRoute
   '/contrats/retraites': typeof AuthenticatedContratsRetraitesRoute
   '/employes/$employeeId': typeof AuthenticatedEmployesEmployeeIdRoute
   '/api/v1/contracts': typeof ApiV1ContractsRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/utilisateurs': typeof AuthenticatedUtilisateursRoute
   '/contrats/a-regulariser': typeof AuthenticatedContratsARegulariserRoute
   '/contrats/echeances': typeof AuthenticatedContratsEcheancesRoute
+  '/contrats/essai': typeof AuthenticatedContratsEssaiRoute
   '/contrats/retraites': typeof AuthenticatedContratsRetraitesRoute
   '/employes/$employeeId': typeof AuthenticatedEmployesEmployeeIdRoute
   '/api/v1/contracts': typeof ApiV1ContractsRoute
@@ -309,6 +318,7 @@ export interface FileRoutesById {
   '/_authenticated/utilisateurs': typeof AuthenticatedUtilisateursRoute
   '/_authenticated/contrats/a-regulariser': typeof AuthenticatedContratsARegulariserRoute
   '/_authenticated/contrats/echeances': typeof AuthenticatedContratsEcheancesRoute
+  '/_authenticated/contrats/essai': typeof AuthenticatedContratsEssaiRoute
   '/_authenticated/contrats/retraites': typeof AuthenticatedContratsRetraitesRoute
   '/_authenticated/employes/$employeeId': typeof AuthenticatedEmployesEmployeeIdRoute
   '/api/v1/contracts': typeof ApiV1ContractsRoute
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/contrats/a-regulariser'
     | '/contrats/echeances'
+    | '/contrats/essai'
     | '/contrats/retraites'
     | '/employes/$employeeId'
     | '/api/v1/contracts'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/contrats/a-regulariser'
     | '/contrats/echeances'
+    | '/contrats/essai'
     | '/contrats/retraites'
     | '/employes/$employeeId'
     | '/api/v1/contracts'
@@ -411,6 +423,7 @@ export interface FileRouteTypes {
     | '/_authenticated/utilisateurs'
     | '/_authenticated/contrats/a-regulariser'
     | '/_authenticated/contrats/echeances'
+    | '/_authenticated/contrats/essai'
     | '/_authenticated/contrats/retraites'
     | '/_authenticated/employes/$employeeId'
     | '/api/v1/contracts'
@@ -618,6 +631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratsEcheancesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contrats/essai': {
+      id: '/_authenticated/contrats/essai'
+      path: '/contrats/essai'
+      fullPath: '/contrats/essai'
+      preLoaderRoute: typeof AuthenticatedContratsEssaiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contrats/retraites': {
       id: '/_authenticated/contrats/retraites'
       path: '/contrats/retraites'
@@ -681,6 +701,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUtilisateursRoute: typeof AuthenticatedUtilisateursRoute
   AuthenticatedContratsARegulariserRoute: typeof AuthenticatedContratsARegulariserRoute
   AuthenticatedContratsEcheancesRoute: typeof AuthenticatedContratsEcheancesRoute
+  AuthenticatedContratsEssaiRoute: typeof AuthenticatedContratsEssaiRoute
   AuthenticatedContratsRetraitesRoute: typeof AuthenticatedContratsRetraitesRoute
   AuthenticatedEmployesEmployeeIdRoute: typeof AuthenticatedEmployesEmployeeIdRoute
   AuthenticatedEmployesIndexRoute: typeof AuthenticatedEmployesIndexRoute
@@ -705,6 +726,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContratsARegulariserRoute:
     AuthenticatedContratsARegulariserRoute,
   AuthenticatedContratsEcheancesRoute: AuthenticatedContratsEcheancesRoute,
+  AuthenticatedContratsEssaiRoute: AuthenticatedContratsEssaiRoute,
   AuthenticatedContratsRetraitesRoute: AuthenticatedContratsRetraitesRoute,
   AuthenticatedEmployesEmployeeIdRoute: AuthenticatedEmployesEmployeeIdRoute,
   AuthenticatedEmployesIndexRoute: AuthenticatedEmployesIndexRoute,

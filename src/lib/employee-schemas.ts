@@ -364,6 +364,8 @@ export const contractSchema = (maxMonths: number | null) =>
       }),
       startDate: requiredDate("Date de début"),
       durationMonths: z.string().trim(),
+      /** Période d'essai : aucune, 1 mois ou 2 mois (renouvelable une fois ensuite). */
+      probationMonths: z.enum(["", "1", "2"]),
     })
     .superRefine((v, ctx) => {
       if (v.type === "cdi") {

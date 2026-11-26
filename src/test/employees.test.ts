@@ -198,7 +198,7 @@ describe("dates et contrats", () => {
 
   it("applique les règles de durée selon le type de contrat", () => {
     const schema = contractSchema(24);
-    const base = { startDate: "2026-01-01" };
+    const base = { startDate: "2026-01-01", probationMonths: "" };
     expect(schema.safeParse({ ...base, type: "cdi", durationMonths: "" }).success).toBe(true);
     expect(
       messages(schema.safeParse({ ...base, type: "cdi", durationMonths: "6" }))["durationMonths"],

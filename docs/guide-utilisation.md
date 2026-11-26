@@ -98,3 +98,9 @@ Sur téléphone, le menu s'ouvre par le bouton en haut à gauche ; les écrans s
 - Un matricule provisoire se remplace **une seule fois** (onglet Identité → Modifier) ; ensuite il est permanent.
 - **DRH / gestionnaire RH** : sur la fiche d'un employé sans compte, bouton **Demander l'accès**. L'**admin IT** traite la demande dans **Demandes d'accès** (accepter = invitation par e-mail, ou refuser). L'admin IT peut aussi cliquer directement **Donner l'accès**.
 - Rôles DRH, gestionnaire RH, paie et admin IT : terminez la double authentification, sinon aucun droit n'est actif.
+
+### Période d'essai
+
+- À la création d'un contrat, choisissez la **période d'essai** : aucune, 1 mois ou 2 mois. Elle est **renouvelable une seule fois** (même durée) avec le bouton « Renouveler l'essai » dans l'onglet Contrats de la fiche.
+- Le suivi se trouve dans **Contrats → Périodes d'essai** : fin d'essai, temps restant, site et unité.
+- La **DRH et les gestionnaires RH** reçoivent une alerte (cloche, et e-mail si activé) 15 jours avant la fin de l'essai ; ce délai se règle dans Paramètres RH.

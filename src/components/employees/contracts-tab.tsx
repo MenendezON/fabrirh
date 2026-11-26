@@ -31,7 +31,14 @@ import {
   type ContractType,
   type ExitForm,
 } from "@/lib/employee-schemas";
-import { canFollowUp, overlapMessage, suggestedStart, type ContractMode } from "@/lib/contracts";
+import {
+  canFollowUp,
+  overlapMessage,
+  probationEnd,
+  probationLabel,
+  suggestedStart,
+  type ContractMode,
+} from "@/lib/contracts";
 import {
   employeeKey,
   formatSeniority,
@@ -145,7 +152,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
 
   const form = useForm<ContractForm>({
     resolver: zodResolver(contractSchema(maxMonths)),
-    defaultValues: { type: "cdi", startDate: todayIso(), durationMonths: "" },
+    defaultValues: { type: "cdi", startDate: todayIso(), durationMonths: "", probationMonths: "" },
   });
   const { control, register, handleSubmit, reset, formState } = form;
   const errors = formState.errors;
@@ -169,6 +176,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
             : "cdi",
       startDate: start,
       durationMonths: "",
+      probationMonths: "",
     });
     setDialog({ mode, previous });
   };
@@ -182,6 +190,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
         type: v.type,
         start_date: v.startDate,
         duration_months: v.type === "cdi" ? null : Number(v.durationMonths),
+        probation_months: v.probationMonths === "" ? null : Number(v.probationMonths),
         previous_contract_id: dialog?.previous?.id ?? null,
       });
       if (error) throw error;
@@ -194,6 +203,15 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
         reset();
       },
     },
+  );
+
+  const renewProbation = useEmployeeMutation(
+    ctx.id,
+    async (contractId: string) => {
+      const { error } = await supabase.rpc("renew_probation", { _contract_id: contractId });
+      if (error) throw error;
+    },
+    { success: "Période d'essai renouvelée." },
   );
 
   const submit = (v: ContractForm) => {
@@ -243,6 +261,7 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                 <th className="px-3 py-2 font-medium">Début</th>
                 <th className="px-3 py-2 font-medium">Durée</th>
                 <th className="px-3 py-2 font-medium">Fin</th>
+                <th className="px-3 py-2 font-medium">Essai</th>
                 <th className="px-3 py-2 font-medium">Origine</th>
                 {canCreate && (
                   <th className="px-3 py-2 font-medium">
@@ -263,6 +282,28 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                     {c.duration_months ? `${c.duration_months} mois` : "Indéterminée"}
                   </td>
                   <td className="px-3 py-2">{endLabel(c)}</td>
+                  <td className="px-3 py-2">
+                    {c.probation_months ? (
+                      <span className="flex flex-wrap items-center gap-2">
+                        {probationLabel(c.start_date, c.probation_months, c.probation_renewed)}
+                        {canCreate &&
+                          ctx.current?.contract_id === c.id &&
+                          !c.probation_renewed &&
+                          probationEnd(c.start_date, c.probation_months, false) >= todayIso() && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={renewProbation.isPending}
+                              onClick={() => renewProbation.mutate(c.id)}
+                            >
+                              Renouveler l'essai
+                            </Button>
+                          )}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-muted-foreground">
                     {c.previous_contract_id
                       ? originLabel(
@@ -369,6 +410,26 @@ function ContractsSection({ ctx }: { ctx: FicheContext }) {
                 />
               </FormRow>
             )}
+            <FormRow
+              label="Période d'essai"
+              hint="1 ou 2 mois ; renouvelable une fois ensuite. La RH est alertée avant la fin."
+            >
+              <Controller
+                control={control}
+                name="probationMonths"
+                render={({ field }) => (
+                  <SelectInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    emptyLabel="Aucune"
+                    options={[
+                      { value: "1", label: "1 mois" },
+                      { value: "2", label: "2 mois" },
+                    ]}
+                  />
+                )}
+              />
+            </FormRow>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Annuler

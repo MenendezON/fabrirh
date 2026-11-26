@@ -20,7 +20,7 @@ for pass in 1 2; do
   done
 done
 fail=0
-for t in permissions rules notifications manuel-01-02 manuel-03-04 manuel-05 manuel-08-09 manuel-10 manuel-11; do
+for t in permissions rules notifications manuel-01-02 manuel-03-04 manuel-05 manuel-08-09 manuel-10 manuel-11 manuel-12; do
   res=$(psql -d $DB -q -f supabase/tests/$t.test.sql 2>&1 | grep -m1 "RÉSULTATS")
   echo "$t : ${res:-PAS DE RÉSULTAT}"
   case "$res" in *" 0 échec"*) ;; *) fail=1;; esac

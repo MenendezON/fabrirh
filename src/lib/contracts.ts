@@ -278,3 +278,56 @@ export async function markNotificationsRead(ids: string[]): Promise<void> {
     .is("read_at", null);
   if (error) throw error;
 }
+
+// ---------- Période d'essai ----------
+
+/** Dernier jour de l'essai (même règle que la base) : début + durée, doublée si renouvelé, moins un jour. */
+export function probationEnd(startIso: string, months: number, renewed: boolean): string {
+  const [y, m, d] = startIso.split("-").map(Number) as [number, number, number];
+  const total = months * (renewed ? 2 : 1);
+  const target = new Date(Date.UTC(y, m - 1 + total, 1));
+  const lastDay = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  const end = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), Math.min(d, lastDay)),
+  );
+  end.setUTCDate(end.getUTCDate() - 1);
+  return end.toISOString().slice(0, 10);
+}
+
+export function probationLabel(startIso: string, months: number, renewed: boolean): string {
+  const end = probationEnd(startIso, months, renewed);
+  const [y, m, d] = end.split("-");
+  return `${months * (renewed ? 2 : 1)} mois${renewed ? " (renouvelé)" : ""} — jusqu'au ${d}/${m}/${y}`;
+}
+
+export type ProbationRow = {
+  employee_id: string;
+  matricule: string | null;
+  first_names: string | null;
+  last_name: string | null;
+  primary_site_id: string | null;
+  org_unit_id: string | null;
+  contract_id: string;
+  contract_type: string;
+  contract_start: string;
+  probation_months: number;
+  probation_renewed: boolean;
+  probation_end: string;
+  days_remaining: number;
+  can_renew: boolean;
+};
+
+export const probationQuery = queryOptions({
+  queryKey: ["contracts", "probation"],
+  queryFn: async (): Promise<ProbationRow[]> => {
+    const { data, error } = await supabase
+      .from("v_probation")
+      .select("*")
+      .order("probation_end", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    return (data ?? []) as unknown as ProbationRow[];
+  },
+});

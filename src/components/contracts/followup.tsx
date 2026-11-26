@@ -43,6 +43,7 @@ export function matchesFollowup(
 
 const TABS = [
   { to: "/contrats/echeances", label: "Fins de contrat à venir" },
+  { to: "/contrats/essai", label: "Périodes d'essai" },
   { to: "/contrats/retraites", label: "Suivi des retraites" },
   { to: "/contrats/a-regulariser", label: "À régulariser" },
 ] as const;
